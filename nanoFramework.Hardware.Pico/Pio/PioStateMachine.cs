@@ -423,9 +423,49 @@ namespace nanoFramework.Hardware.Pico.Pio
             return NativeRead(_block.Index, _sm, buffer, offset, count, timeoutMs);
         }
 
+        /// <summary>
+        /// Writes <paramref name="count"/> words from <paramref name="buffer"/> into the TX FIFO using a
+        /// DMA channel paced by this state machine's TX request. Blocks the calling thread but yields the
+        /// CLR while the transfer runs, so other threads keep running (no busy-wait, no FIFO stall).
+        /// </summary>
+        /// <param name="buffer">Source array.</param>
+        /// <param name="offset">Index in <paramref name="buffer"/> at which to start reading.</param>
+        /// <param name="count">Number of 32-bit words to write.</param>
+        /// <param name="timeoutMs">Maximum time to wait, in milliseconds.</param>
+        /// <returns>The number of words actually transferred (less than <paramref name="count"/> on timeout).</returns>
+        /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="buffer"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">The range falls outside <paramref name="buffer"/>, or an argument is negative.</exception>
+        /// <exception cref="InvalidOperationException">No DMA channel was free, or a transfer is already running on this state machine.</exception>
+        public int Write(uint[] buffer, int offset, int count, int timeoutMs)
+        {
+            if (buffer == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            if (offset < 0 || count < 0 || timeoutMs < 0 || count > buffer.Length || offset > buffer.Length - count)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
+            if (count == 0)
+            {
+                return 0;
+            }
+
+            // Single native call: copies the words into a bounce buffer, parks this thread on the PIO event
+            // so the CLR yields, and resumes on the completion IRQ -- no busy-wait, no FIFO stall. The native
+            // handler validates the claim state and throws if the state machine has been disposed.
+            return NativeWrite(_block.Index, _sm, buffer, offset, count, timeoutMs);
+        }
+
         #region Native interop (implemented in nf-interpreter)
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern int NativeRead(int block, int sm, uint[] buffer, int offset, int count, int timeoutMs);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern int NativeWrite(int block, int sm, uint[] buffer, int offset, int count, int timeoutMs);
 
 
         [MethodImpl(MethodImplOptions.InternalCall)]
