@@ -45,6 +45,8 @@
     <Compile Include="Pio\PioCondition.cs" />
     <Compile Include="Pio\DestinationOperand.cs" />
     <Compile Include="Pio\PioEncoder.cs" />
+    <Compile Include="Pio\PioEvent.cs" />
+    <Compile Include="Pio\PioEventListener.cs" />
     <Compile Include="Pio\PioFifoJoin.cs" />
     <Compile Include="Pio\PioInstructionRef.cs" />
     <Compile Include="Pio\PioLabel.cs" />

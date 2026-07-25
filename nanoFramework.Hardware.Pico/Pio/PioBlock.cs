@@ -23,14 +23,15 @@ namespace nanoFramework.Hardware.Pico.Pio
     {
         private readonly int _index;
 
-        private NativeEventDispatcher _irqDispatcher;
         private PioInterruptEventHandler _interruptCallbacks;
         private readonly object _irqLock = new object();
+        private static readonly PioEventListener s_eventListener = new PioEventListener();
 
         /// <summary>Initializes a new instance of the <see cref="PioBlock"/> class.</summary>
         internal PioBlock(int index)
         {
             _index = index;
+            s_eventListener.AddBlock(this);
         }
 
         /// <summary>Block index (0..2).</summary>
@@ -173,6 +174,17 @@ namespace nanoFramework.Hardware.Pico.Pio
         }
 
         /// <summary>
+        /// Raises the <see cref="Interrupt"/> event on the event thread with the given IRQ flags. Called by the
+        /// <see cref="PioEventListener"/> when a native PIO IRQ is delivered. Not intended for direct use by application code.
+        /// </summary>
+        /// <param name="flags">The IRQ flags.</param>
+        internal void OnInterruptInternal(uint flags)
+        {
+            PioInterruptEventHandler callbacks = _interruptCallbacks;
+            callbacks?.Invoke(this, flags);
+        }
+
+        /// <summary>
         /// Raised when a state machine on this block asserts a PIO IRQ flag (0..3), or one is forced
         /// from the CPU with <see cref="ForceIrq"/>. The handler runs on the event thread with no CPU
         /// polling. Subscribing arms the interrupt; the last unsubscription disarms it. The flag is
@@ -184,24 +196,12 @@ namespace nanoFramework.Hardware.Pico.Pio
             {
                 lock (_irqLock)
                 {
-                    // register the handler before arming native delivery so an early IRQ isn't dropped
+                    bool isFirstSubscriber = _interruptCallbacks == null;
                     _interruptCallbacks += value;
 
-                    if (_irqDispatcher == null)
+                    if (isFirstSubscriber)
                     {
-                        try
-                        {
-                            NativeEventDispatcher dispatcher = new NativeEventDispatcher("PioIrqDriver", (ulong)_index);
-                            dispatcher.OnInterrupt += OnNativeIrq;
-                            dispatcher.EnableInterrupt();
-                            _irqDispatcher = dispatcher;
-                        }
-                        catch
-                        {
-                            // arming failed: undo the subscription so no handler is left without native delivery
-                            _interruptCallbacks -= value;
-                            throw;
-                        }
+                        NativeSetIrqEnabled(_index, true);
                     }
                 }
             }
@@ -212,12 +212,9 @@ namespace nanoFramework.Hardware.Pico.Pio
                 {
                     _interruptCallbacks -= value;
 
-                    if (_interruptCallbacks == null && _irqDispatcher != null)
+                    if (_interruptCallbacks == null)
                     {
-                        _irqDispatcher.OnInterrupt -= OnNativeIrq;
-                        _irqDispatcher.DisableInterrupt();
-                        _irqDispatcher.Dispose();
-                        _irqDispatcher = null;
+                        NativeSetIrqEnabled(_index, false);
                     }
                 }
             }
@@ -252,6 +249,9 @@ namespace nanoFramework.Hardware.Pico.Pio
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern void NativeClearIrq(int block, int irq);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        private static extern void NativeSetIrqEnabled(int block, bool enabled);
 
         #endregion
     }
