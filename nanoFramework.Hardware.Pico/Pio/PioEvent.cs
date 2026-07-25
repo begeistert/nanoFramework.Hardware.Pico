@@ -10,13 +10,13 @@ namespace nanoFramework.Hardware.Pico.Pio
     internal class PioEvent : BaseEvent
     {
         /// <summary>
-        /// El índice del bloque PIO (0, 1 o 2).
+        /// The index of the PIO block (0, 1, or 2).
         /// </summary>
         public int BlockIndex;
 
         /// <summary>
-        /// Las banderas de interrupción del PIO.
+        /// The state machine interrupt flags raised by the PIO block.
         /// </summary>
-        public uint Flags;
+        public PioInterruptFlags Flags;
     }
 }

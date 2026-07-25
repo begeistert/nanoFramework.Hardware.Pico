@@ -50,6 +50,7 @@
     <Compile Include="Pio\PioFifoJoin.cs" />
     <Compile Include="Pio\PioInstructionRef.cs" />
     <Compile Include="Pio\PioLabel.cs" />
+    <Compile Include="Pio\PioInterruptFlags.cs" />
     <Compile Include="Pio\PioMovOp.cs" />
     <Compile Include="Pio\PioMovStatusSel.cs" />
     <Compile Include="Pio\PioProgram.cs" />

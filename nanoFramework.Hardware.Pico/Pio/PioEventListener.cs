@@ -10,7 +10,6 @@ namespace nanoFramework.Hardware.Pico.Pio
 {
     internal class PioEventListener : IEventProcessor, IEventListener
     {
-        private const byte PioEventMessage = 100;
         private readonly PioBlock[] _pioMap = new PioBlock[3];
         private readonly object _syncRoot = new object();
 
@@ -25,7 +24,7 @@ namespace nanoFramework.Hardware.Pico.Pio
             return new PioEvent
             {
                 BlockIndex = (int)(data1 >> 16),
-                Flags = data2
+                Flags = (PioInterruptFlags)data2
             };
         }
 

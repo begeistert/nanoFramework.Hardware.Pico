@@ -13,7 +13,7 @@ namespace nanoFramework.Hardware.Pico.Pio
     /// Handles a PIO interrupt raised on a block. <paramref name="flags"/> is the bit mask of
     /// state-machine IRQ flags (0..3) that fired (bit <c>n</c> set means state-machine-relative <c>irq n</c>).
     /// </summary>
-    public delegate void PioInterruptEventHandler(PioBlock sender, uint flags);
+    public delegate void PioInterruptEventHandler(PioBlock sender, PioInterruptFlags flags);
 
     /// <summary>
     /// A single PIO block (instruction memory shared by four state machines). Wraps the
@@ -178,7 +178,7 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <see cref="PioEventListener"/> when a native PIO IRQ is delivered. Not intended for direct use by application code.
         /// </summary>
         /// <param name="flags">The IRQ flags.</param>
-        internal void OnInterruptInternal(uint flags)
+        internal void OnInterruptInternal(PioInterruptFlags flags)
         {
             PioInterruptEventHandler callbacks = _interruptCallbacks;
             callbacks?.Invoke(this, flags);
@@ -217,16 +217,6 @@ namespace nanoFramework.Hardware.Pico.Pio
                         NativeSetIrqEnabled(_index, false);
                     }
                 }
-            }
-        }
-
-        // data2 carries the raw state-machine IRQ flag mask the native driver read from IRQ0_INTS[11:8].
-        private void OnNativeIrq(uint data1, uint data2, DateTime time)
-        {
-            PioInterruptEventHandler callbacks = _interruptCallbacks;
-            if (callbacks != null)
-            {
-                callbacks(this, data2);
             }
         }
 
