@@ -16,8 +16,8 @@ namespace nanoFramework.Hardware.Pico.Pio
 
         public PioEventListener()
         {
-            EventSink.AddEventProcessor(EventCategory.Pio, this);
-            EventSink.AddEventListener(EventCategory.Pio, this);
+            EventSink.AddEventProcessor(EventCategory.PicoPio, this);
+            EventSink.AddEventListener(EventCategory.PicoPio, this);
         }
 
         public BaseEvent ProcessEvent(uint data1, uint data2, DateTime time)
