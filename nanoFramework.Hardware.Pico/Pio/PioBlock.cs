@@ -107,14 +107,14 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// this does <em>not</em> mark the state machine as claimed, so the caller is responsible for avoiding
         /// collisions; prefer <see cref="ClaimStateMachine"/> unless a fixed state machine index is required.
         /// </summary>
-        public PioStateMachine StateMachine(int sm)
+        public PioStateMachine StateMachine(int stateMachine)
         {
-            if (sm < 0 || sm > 3)
+            if (stateMachine < 0 || stateMachine > 3)
             {
                 throw new ArgumentOutOfRangeException();
             }
 
-            return new PioStateMachine(this, sm, false);
+            return new PioStateMachine(this, stateMachine, false);
         }
 
         /// <summary>
