@@ -20,21 +20,33 @@ namespace nanoFramework.Hardware.Pico.Pio
         private readonly PioAssembler _owner;
         private readonly int _index;
 
-        /// <summary>Initializes a new instance of the <see cref="PioInstructionRef"/> class.</summary>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PioInstructionRef"/> class.
+        /// </summary>
+        /// <param name="owner">The owning assembler.</param>
+        /// <param name="index">The index of the instruction.</param>
         internal PioInstructionRef(PioAssembler owner, int index)
         {
             _owner = owner;
             _index = index;
         }
 
-        /// <summary>Sets the post-instruction delay in cycles (range checked at Build).</summary>
+        /// <summary>
+        /// Sets the post-instruction delay in cycles (range checked at Build).
+        /// </summary>
+        /// <param name="cycles">The number of cycles to delay.</param>
+        /// <returns>The updated instruction reference.</returns>
         public PioInstructionRef Delay(int cycles)
         {
             _owner.ApplyDelay(_index, cycles);
             return this;
         }
 
-        /// <summary>Asserts a side-set value alongside this instruction.</summary>
+        /// <summary>
+        /// Asserts a side-set value alongside this instruction.
+        /// </summary>
+        /// <param name="value">The side-set value.</param>
+        /// <returns>The updated instruction reference.</returns>
         public PioInstructionRef Side(int value)
         {
             _owner.ApplySide(_index, value);

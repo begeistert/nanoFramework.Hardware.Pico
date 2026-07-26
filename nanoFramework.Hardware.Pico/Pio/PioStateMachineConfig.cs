@@ -14,62 +14,117 @@ namespace nanoFramework.Hardware.Pico.Pio
     /// </summary>
     public sealed class PioStateMachineConfig
     {
-        // flattened config blob layout shared with the native layer
-        /// <summary>Number of entries in the flattened configuration blob.</summary>
+        /// <summary>
+        /// Number of entries in the flattened configuration blob.
+        /// </summary>
         public const int BlobLength = 27;
-        /// <summary>Blob index of the OUT pin base.</summary>
+        /// <summary>
+        /// Blob index of the OUT pin base.
+        /// </summary>
         public const int IdxOutBase = 0;
-        /// <summary>Blob index of the OUT pin count.</summary>
+        /// <summary>
+        /// Blob index of the OUT pin count.
+        /// </summary>
         public const int IdxOutCount = 1;
-        /// <summary>Blob index of the SET pin base.</summary>
+        /// <summary>
+        /// Blob index of the SET pin base.
+        /// </summary>
         public const int IdxSetBase = 2;
-        /// <summary>Blob index of the SET pin count.</summary>
+        /// <summary>
+        /// Blob index of the SET pin count.
+        /// </summary>
         public const int IdxSetCount = 3;
-        /// <summary>Blob index of the side-set pin base.</summary>
+        /// <summary>
+        /// Blob index of the side-set pin base.
+        /// </summary>
         public const int IdxSideSetBase = 4;
-        /// <summary>Blob index of the side-set value-bit count.</summary>
+        /// <summary>
+        /// Blob index of the side-set value-bit count.
+        /// </summary>
         public const int IdxSideSetCount = 5;
-        /// <summary>Blob index of the side-set optional flag.</summary>
+        /// <summary>
+        /// Blob index of the side-set optional flag.
+        /// </summary>
         public const int IdxSideSetOpt = 6;
-        /// <summary>Blob index of the side-set PINDIRS flag.</summary>
+        /// <summary>
+        /// Blob index of the side-set PINDIRS flag.
+        /// </summary>
         public const int IdxSideSetPinDirs = 7;
-        /// <summary>Blob index of the IN pin base.</summary>
+        /// <summary>
+        /// Blob index of the IN pin base.
+        /// </summary>
         public const int IdxInBase = 8;
-        /// <summary>Blob index of the JMP PIN GPIO.</summary>
+        /// <summary>
+        /// Blob index of the JMP PIN GPIO.
+        /// </summary>
         public const int IdxJmpPin = 9;
-        /// <summary>Blob index of the OUT/pull shift-right flag.</summary>
+        /// <summary>
+        /// Blob index of the OUT/pull shift-right flag.
+        /// </summary>
         public const int IdxOutShiftRight = 10;
-        /// <summary>Blob index of the autopull flag.</summary>
+        /// <summary>
+        /// Blob index of the autopull flag.
+        /// </summary>
         public const int IdxAutoPull = 11;
-        /// <summary>Blob index of the autopull threshold.</summary>
+        /// <summary>
+        /// Blob index of the autopull threshold.
+        /// </summary>
         public const int IdxPullThreshold = 12;
-        /// <summary>Blob index of the IN/push shift-right flag.</summary>
+        /// <summary>
+        /// Blob index of the IN/push shift-right flag.
+        /// </summary>
         public const int IdxInShiftRight = 13;
-        /// <summary>Blob index of the autopush flag.</summary>
+        /// <summary>
+        /// Blob index of the autopush flag.
+        /// </summary>
         public const int IdxAutoPush = 14;
-        /// <summary>Blob index of the autopush threshold.</summary>
+        /// <summary>
+        /// Blob index of the autopush threshold.
+        /// </summary>
         public const int IdxPushThreshold = 15;
-        /// <summary>Blob index of the wrap-target offset.</summary>
+        /// <summary>
+        /// Blob index of the wrap-target offset.
+        /// </summary>
         public const int IdxWrapTarget = 16;
-        /// <summary>Blob index of the wrap offset.</summary>
+        /// <summary>
+        /// Blob index of the wrap offset.
+        /// </summary>
         public const int IdxWrap = 17;
-        /// <summary>Blob index of the clock-divider integer part.</summary>
+        /// <summary>
+        /// Blob index of the clock-divider integer part.
+        /// </summary>
         public const int IdxClkDivInt = 18;
-        /// <summary>Blob index of the clock-divider fractional part.</summary>
+        /// <summary>
+        /// Blob index of the clock-divider fractional part.
+        /// </summary>
         public const int IdxClkDivFrac = 19;
-        /// <summary>Blob index of the FIFO join mode.</summary>
+        /// <summary>
+        /// Blob index of the FIFO join mode.
+        /// </summary>
         public const int IdxFifoJoin = 20;
-        /// <summary>Blob index of the GPIO base.</summary>
+        /// <summary>
+        /// Blob index of the GPIO base.
+        /// </summary>
         public const int IdxGpioBase = 21;
-        /// <summary>Blob index of the MOV status source selector.</summary>
+        /// <summary>
+        /// Blob index of the MOV status source selector.
+        /// </summary>
         public const int IdxMovStatusSel = 22;
-        /// <summary>Blob index of the MOV status N threshold.</summary>
+        /// <summary>
+        /// Blob index of the MOV status N threshold.
+        /// </summary>
         public const int IdxMovStatusN = 23;
-        /// <summary>Blob index of the OUT sticky flag.</summary>
+        /// <summary>
+        /// Blob index of the OUT sticky flag.
+        /// </summary>
         public const int IdxOutSticky = 24;
-        /// <summary>Blob index of the inline-OUT-enable flag.</summary>
+        /// <summary>
+        /// Blob index of the inline-OUT-enable flag.
+        /// </summary>
         public const int IdxInlineOutEn = 25;
-        /// <summary>Blob index of the inline OUT enable bit selector.</summary>
+        /// <summary>
+        /// Blob index of the inline OUT enable bit selector.
+        /// </summary>
         public const int IdxOutEnSel = 26;
 
         // the shift threshold spans the full 32-bit shift register; the clock divider integer defaults to 1 (no division)
@@ -112,7 +167,9 @@ namespace nanoFramework.Hardware.Pico.Pio
         private bool _inlineOutEn;
         private int _outEnSel;
 
-        /// <summary>Creates an empty configuration (clkdiv = 1.0, no pins mapped).</summary>
+        /// <summary>
+        /// Creates an empty configuration (clkdiv = 1.0, no pins mapped).
+        /// </summary>
         public PioStateMachineConfig()
         {
         }
@@ -122,6 +179,8 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <paramref name="offset"/>: wrap/side-set/shift defaults are taken from the
         /// program (matching the SDK's <c>*_program_get_default_config</c>).
         /// </summary>
+        /// <param name="program">The assembled program.</param>
+        /// <param name="offset">The absolute instruction-memory offset where the program will be loaded (0..31).</param>
         /// <exception cref="ArgumentNullException"><paramref name="program"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException">Offset must be 0..31.</exception>
         public static PioStateMachineConfig FromProgram(PioProgram program, int offset)
@@ -151,7 +210,11 @@ namespace nanoFramework.Hardware.Pico.Pio
             return cfg;
         }
 
-        /// <summary>Maps the OUT pin group (base GPIO and consecutive pin count).</summary>
+        /// <summary>
+        /// Maps the OUT pin group (base GPIO and consecutive pin count).
+        /// </summary>
+        /// <param name="basePin">The base GPIO pin.</param>
+        /// <param name="count">The number of consecutive pins.</param>
         public PioStateMachineConfig OutPins(int basePin, int count)
         {
             ValidatePinGroup(basePin, count);
@@ -160,7 +223,11 @@ namespace nanoFramework.Hardware.Pico.Pio
             return this;
         }
 
-        /// <summary>Maps the SET pin group (base GPIO and consecutive pin count, 0..5).</summary>
+        /// <summary>
+        /// Maps the SET pin group (base GPIO and consecutive pin count, 0..5).
+        /// </summary>
+        /// <param name="basePin">The base GPIO pin.</param>
+        /// <param name="count">The number of consecutive pins.</param>
         /// <exception cref="ArgumentException">SET pin count must be 0..5.</exception>
         public PioStateMachineConfig SetPins(int basePin, int count)
         {
@@ -175,7 +242,10 @@ namespace nanoFramework.Hardware.Pico.Pio
             return this;
         }
 
-        /// <summary>Maps the side-set pin base. The count comes from the program/assembler.</summary>
+        /// <summary>
+        /// Maps the side-set pin base. The count comes from the program/assembler.
+        /// </summary>
+        /// <param name="basePin">The base GPIO pin.</param>
         public PioStateMachineConfig SideSetPins(int basePin)
         {
             ValidatePinBase(basePin);
@@ -183,7 +253,10 @@ namespace nanoFramework.Hardware.Pico.Pio
             return this;
         }
 
-        /// <summary>Maps the IN pin base.</summary>
+        /// <summary>
+        /// Maps the IN pin base.
+        /// </summary>
+        /// <param name="basePin">The base GPIO pin.</param>
         public PioStateMachineConfig InPins(int basePin)
         {
             ValidatePinBase(basePin);
@@ -192,7 +265,10 @@ namespace nanoFramework.Hardware.Pico.Pio
             return this;
         }
 
-        /// <summary>Selects the GPIO used by the JMP PIN condition.</summary>
+        /// <summary>
+        /// Selects the GPIO used by the JMP PIN condition.
+        /// </summary>
+        /// <param name="pin">The GPIO pin.</param>
         public PioStateMachineConfig JmpPin(int pin)
         {
             ValidatePinBase(pin);
@@ -205,6 +281,7 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// Sets the clock divider (1.0 .. 65536.0). The SM advances at sysclk/div.
         /// Stored as the integer and 1/256 fractional parts of the CLKDIV register.
         /// </summary>
+        /// <param name="div">The clock divider, 1.0 to 65536.0.</param>
         /// <exception cref="ArgumentException">Clock divisor must be 1.0..65536.0.</exception>
         public PioStateMachineConfig ClockDivisor(float div)
         {
@@ -274,6 +351,7 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// Sets the FIFO join mode. The PUT/GET modes (RP2350/PIO v1) make the RX FIFO a
         /// random-access register file for the indexed RX-FIFO MOV instructions.
         /// </summary>
+        /// <param name="mode">The FIFO join mode.</param>
         public PioStateMachineConfig FifoJoin(PioFifoJoin mode)
         {
             _fifoJoin = mode;
@@ -285,6 +363,7 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// — so a state machine can reach the upper GPIOs on 48-pin packages (RP2350B). Pin mappings
         /// stay <em>absolute</em> GPIO numbers; the base is subtracted to form the 5-bit pin fields.
         /// </summary>
+        /// <param name="gpioBase">The GPIO base.</param>
         /// <exception cref="ArgumentException">GPIO base must be 0 or 16.</exception>
         public PioStateMachineConfig GpioBase(int gpioBase)
         {
@@ -297,7 +376,9 @@ namespace nanoFramework.Hardware.Pico.Pio
             return this;
         }
 
-        /// <summary>Overrides the wrap region (absolute program offsets). Normally seeded by FromProgram.</summary>
+        /// <summary>
+        /// Overrides the wrap region (absolute program offsets). Normally seeded by FromProgram.
+        /// </summary>
         /// <param name="wrapTarget">The PC to wrap back to (0..31).</param>
         /// <param name="wrap">The last PC before wrapping (0..31), at or after <paramref name="wrapTarget"/>.</param>
         /// <returns>This configuration, for chaining.</returns>
@@ -318,6 +399,9 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// Source for the <c>mov ..., status</c> instruction: all-ones when the selected FIFO's level is
         /// less than <paramref name="n"/>, else all-zeroes (EXECCTRL STATUS_SEL/STATUS_N).
         /// </summary>
+        /// <param name="sel">The FIFO to monitor.</param>
+        /// <param name="n">The threshold (0..15).</param>
+        /// <returns>This configuration, for chaining.</returns>
         /// <exception cref="ArgumentException">Status N must be 0..15.</exception>
         public PioStateMachineConfig MovStatus(PioMovStatusSel sel, int n)
         {
@@ -336,6 +420,10 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// cycle; <paramref name="enableInlineOut"/> uses OUT bit <paramref name="enableBitIndex"/> as a
         /// per-cycle output enable (EXECCTRL OUT_STICKY / INLINE_OUT_EN / OUT_EN_SEL).
         /// </summary>
+        /// <param name="sticky">Indicates whether to keep the last OUT/SET value driven each cycle.</param>
+        /// <param name="enableInlineOut">Indicates whether to use the inline output enable.</param>
+        /// <param name="enableBitIndex">The index of the bit used for output enable (0..31).</param>
+        /// <returns>This configuration, for chaining.</returns>
         /// <exception cref="ArgumentException">Enable bit index must be 0..31.</exception>
         public PioStateMachineConfig OutSpecial(bool sticky, bool enableInlineOut, int enableBitIndex)
         {
@@ -350,7 +438,10 @@ namespace nanoFramework.Hardware.Pico.Pio
             return this;
         }
 
-        /// <summary>Flattens the configuration into the fixed-layout blob handed to native interop.</summary>
+        /// <summary>
+        /// Flattens the configuration into the fixed-layout blob handed to native interop.
+        /// </summary>
+        /// <returns>The configuration blob.</returns>
         public uint[] ToBlob()
         {
             // PINCTRL fields are relative to the GPIO base, so every mapped pin must sit in the window

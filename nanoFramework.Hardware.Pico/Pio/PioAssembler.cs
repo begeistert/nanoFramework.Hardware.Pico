@@ -47,12 +47,17 @@ namespace nanoFramework.Hardware.Pico.Pio
 
         #region Construction
 
-        /// <summary>Creates an assembler with default options (no side-set, RP2040).</summary>
+        /// <summary>
+        /// Creates an assembler with default options (no side-set, RP2040).
+        /// </summary>
         public PioAssembler() : this(null)
         {
         }
 
-        /// <summary>Creates an assembler with the given options.</summary>
+        /// <summary>
+        /// Creates an assembler with the given options.
+        /// </summary>
+        /// <param name="options">The assembler options.</param>
         /// <exception cref="ArgumentException">SideSetCount must be 0..5.</exception>
         /// <exception cref="ArgumentException">Side-set (count + optional enable bit) cannot exceed 5 bits.</exception>
         public PioAssembler(PioAssemblerOptions options)
@@ -86,7 +91,9 @@ namespace nanoFramework.Hardware.Pico.Pio
             _jmpLabel = new PioLabel[MaxInstructions];
         }
 
-        /// <summary>Maximum delay encodable per instruction given the side-set configuration.</summary>
+        /// <summary>
+        /// Maximum delay encodable per instruction given the side-set configuration.
+        /// </summary>
         public int MaxDelay
         {
             get
@@ -95,7 +102,9 @@ namespace nanoFramework.Hardware.Pico.Pio
             }
         }
 
-        /// <summary>Number of instructions emitted so far (the current program offset).</summary>
+        /// <summary>
+        /// Number of instructions emitted so far (the current program offset).
+        /// </summary>
         public int Count
         {
             get
@@ -108,14 +117,19 @@ namespace nanoFramework.Hardware.Pico.Pio
 
         #region Labels and directives
 
-        /// <summary>Allocates an unbound label. Place it later with <see cref="MarkLabel"/>.</summary>
+        /// <summary>
+        /// Allocates an unbound label. Place it later with <see cref="MarkLabel"/>.
+        /// </summary>
+        /// <returns>The created <see cref="PioLabel"/>.</returns>
         public PioLabel DefineLabel()
         {
             // reference type so MarkLabel can bind the address in place
             return new PioLabel(_labelCount++, this);
         }
 
-        /// <summary>Binds a label to the current program offset.</summary>
+        /// <summary>
+        /// Binds a label to the current program offset.
+        /// </summary>
         /// <param name="label">The label to bind, created by this assembler's <see cref="DefineLabel"/>.</param>
         /// <exception cref="ArgumentNullException"><paramref name="label"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="label"/> belongs to another assembler.</exception>
@@ -140,7 +154,9 @@ namespace nanoFramework.Hardware.Pico.Pio
             label.Address = _count;
         }
 
-        /// <summary>Marks the wrap-target (PC wraps back here). Defaults to offset 0.</summary>
+        /// <summary>
+        /// Marks the wrap-target (PC wraps back here). Defaults to offset 0.
+        /// </summary>
         /// <exception cref="InvalidOperationException">.wrap_target already set.</exception>
         public void WrapTarget()
         {
@@ -152,7 +168,9 @@ namespace nanoFramework.Hardware.Pico.Pio
             _wrapTarget = _count;
         }
 
-        /// <summary>Marks the wrap point (the last instruction that wraps). Defaults to the final instruction.</summary>
+        /// <summary>
+        /// Marks the wrap point (the last instruction that wraps). Defaults to the final instruction.
+        /// </summary>
         /// <exception cref="InvalidOperationException">.wrap requires at least one instruction.</exception>
         /// <exception cref="InvalidOperationException">.wrap already set.</exception>
         public void Wrap()
@@ -170,7 +188,10 @@ namespace nanoFramework.Hardware.Pico.Pio
             _wrap = _count - 1;
         }
 
-        /// <summary>Pins the program to a fixed load offset 0..31 (default: relocatable, -1).</summary>
+        /// <summary>
+        /// Pins the program to a fixed load offset 0..31 (default: relocatable, -1).
+        /// </summary>
+        /// <param name="origin">The load offset.</param>
         /// <exception cref="ArgumentException">Origin must be 0..31.</exception>
         public void SetOrigin(int origin)
         {
@@ -182,7 +203,12 @@ namespace nanoFramework.Hardware.Pico.Pio
             _origin = (sbyte)origin;
         }
 
-        /// <summary>Default OUT/pull shift behavior (equivalent to pioasm <c>.out</c>).</summary>
+        /// <summary>
+        /// Default OUT/pull shift behavior (equivalent to pioasm <c>.out</c>).
+        /// </summary>
+        /// <param name="direction">The shift direction.</param>
+        /// <param name="autoPull">Indicates whether to automatically pull data.</param>
+        /// <param name="threshold">The threshold for automatic pulling.</param>
         public void OutShift(ShiftDirection direction, bool autoPull, int threshold)
         {
             ValidateThreshold(threshold);
@@ -191,7 +217,12 @@ namespace nanoFramework.Hardware.Pico.Pio
             _pullThreshold = threshold;
         }
 
-        /// <summary>Default IN/push shift behavior (equivalent to pioasm <c>.in</c>).</summary>
+        /// <summary>
+        /// Default IN/push shift behavior (equivalent to pioasm <c>.in</c>).
+        /// </summary>
+        /// <param name="direction">The shift direction.</param>
+        /// <param name="autoPush">Indicates whether to automatically push data.</param>
+        /// <param name="threshold">The threshold for automatic pushing.</param>
         public void InShift(ShiftDirection direction, bool autoPush, int threshold)
         {
             ValidateThreshold(threshold);
@@ -204,13 +235,22 @@ namespace nanoFramework.Hardware.Pico.Pio
 
         #region Instructions
 
-        /// <summary>Jmp &lt;label&gt; (unconditional).</summary>
+        /// <summary>
+        /// Jmp &lt;label&gt; (unconditional).
+        /// </summary>
+        /// <param name="target">The label to jump to.</param>
+        /// <returns>The instruction reference.</returns>
         public PioInstructionRef Jmp(PioLabel target)
         {
             return Jmp(PioCondition.Always, target);
         }
 
-        /// <summary>Jmp &lt;cond&gt; &lt;label&gt;.</summary>
+        /// <summary>
+        /// Jmp &lt;cond&gt; &lt;label&gt;.
+        /// </summary>
+        /// <param name="condition">The condition for the jump.</param>
+        /// <param name="target">The label to jump to.</param>
+        /// <returns>The instruction reference.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="target"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="target"/> belongs to another assembler.</exception>
         public PioInstructionRef Jmp(PioCondition condition, PioLabel target)
@@ -234,7 +274,12 @@ namespace nanoFramework.Hardware.Pico.Pio
             return new PioInstructionRef(this, index);
         }
 
-        /// <summary>Jmp to an absolute program offset.</summary>
+        /// <summary>
+        /// Jmp to an absolute program offset.
+        /// </summary>
+        /// <param name="condition">The condition for the jump.</param>
+        /// <param name="address">The absolute address to jump to.</param>
+        /// <returns>The instruction reference.</returns>
         /// <exception cref="ArgumentException">Jump address must be 0..31.</exception>
         public PioInstructionRef Jmp(PioCondition condition, int address)
         {
@@ -246,7 +291,13 @@ namespace nanoFramework.Hardware.Pico.Pio
             return new PioInstructionRef(this, Add(PioEncoder.Jmp(condition, address)));
         }
 
-        /// <summary>Wait &lt;polarity&gt; &lt;source&gt; &lt;index&gt;.</summary>
+        /// <summary>
+        /// Wait &lt;polarity&gt; &lt;source&gt; &lt;index&gt;.
+        /// </summary>
+        /// <param name="polarity">The polarity of the wait condition.</param>
+        /// <param name="source">The source of the wait condition.</param>
+        /// <param name="index">The index for the wait condition.</param>
+        /// <returns>The instruction reference.</returns>
         /// <exception cref="ArgumentException">Wait index must be 0..31.</exception>
         public PioInstructionRef Wait(bool polarity, PioWaitSource source, int index)
         {
@@ -259,12 +310,21 @@ namespace nanoFramework.Hardware.Pico.Pio
         }
 
         /// <summary>Wait for an absolute GPIO to reach <paramref name="level"/>.</summary>
+        /// <param name="level">The level to wait for.</param>
+        /// <param name="gpio">The GPIO to wait for.</param>
+        /// <returns>The instruction reference.</returns>
         public PioInstructionRef WaitGpio(bool level, int gpio) => Wait(level, PioWaitSource.Gpio, gpio);
 
         /// <summary>Wait for an IN-base-relative pin to reach <paramref name="level"/>.</summary>
+        /// <param name="level">The level to wait for.</param>
+        /// <param name="pin">The pin to wait for.</param>
+        /// <returns>The instruction reference.</returns>
         public PioInstructionRef WaitPin(bool level, int pin) => Wait(level, PioWaitSource.Pin, pin);
 
         /// <summary>Wait for IRQ flag <paramref name="irq"/> (0..7) to reach <paramref name="level"/>.</summary>
+        /// <param name="level">The level to wait for.</param>
+        /// <param name="irq">The IRQ flag to wait for.</param>
+        /// <returns>The instruction reference.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="irq"/> is not in the range 0..7.</exception>
         public PioInstructionRef WaitIrq(bool level, int irq)
         {
@@ -277,6 +337,9 @@ namespace nanoFramework.Hardware.Pico.Pio
         }
 
         /// <summary>IN &lt;source&gt;, &lt;bitCount&gt; (1..32).</summary>
+        /// <param name="source">The source for the IN instruction.</param>
+        /// <param name="bitCount">The number of bits to read.</param>
+        /// <returns>The instruction reference.</returns>
         public PioInstructionRef In(SourceOperand source, int bitCount)
         {
             ValidateBitCount(bitCount);
@@ -285,6 +348,9 @@ namespace nanoFramework.Hardware.Pico.Pio
         }
 
         /// <summary>Out &lt;dest&gt;, &lt;bitCount&gt; (1..32).</summary>
+        /// <param name="dest">The destination for the Out instruction.</param>
+        /// <param name="bitCount">The number of bits to write.</param>
+        /// <returns>The instruction reference.</returns>
         public PioInstructionRef Out(DestinationOperand dest, int bitCount)
         {
             ValidateBitCount(bitCount);
@@ -293,24 +359,37 @@ namespace nanoFramework.Hardware.Pico.Pio
         }
 
         /// <summary>Push [iffull] [block].</summary>
+        /// <param name="ifFull">Indicates whether to push if full.</param>
+        /// <param name="block">Indicates whether to block.</param>
+        /// <returns>The instruction reference.</returns>
         public PioInstructionRef Push(bool ifFull = false, bool block = true)
         {
             return new PioInstructionRef(this, Add(PioEncoder.Push(ifFull, block)));
         }
 
         /// <summary>Pull [ifempty] [block].</summary>
+        /// <param name="ifEmpty">Indicates whether to pull if empty.</param>
+        /// <param name="block">Indicates whether to block.</param>
+        /// <returns>The instruction reference.</returns>
         public PioInstructionRef Pull(bool ifEmpty = false, bool block = true)
         {
             return new PioInstructionRef(this, Add(PioEncoder.Pull(ifEmpty, block)));
         }
 
         /// <summary>Mov &lt;dest&gt;, &lt;src&gt;.</summary>
+        /// <param name="dest">The destination for the MOV instruction.</param>
+        /// <param name="src">The source for the MOV instruction.</param>
+        /// <returns>The instruction reference.</returns>
         public PioInstructionRef Mov(DestinationOperand dest, SourceOperand src)
         {
             return Mov(dest, PioMovOp.None, src);
         }
 
         /// <summary>Mov &lt;dest&gt;, &lt;op&gt; &lt;src&gt;.</summary>
+        /// <param name="dest">The destination for the MOV instruction.</param>
+        /// <param name="op">The operation for the MOV instruction.</param>
+        /// <param name="src">The source for the MOV instruction.</param>
+        /// <returns>The instruction reference.</returns>
         public PioInstructionRef Mov(DestinationOperand dest, PioMovOp op, SourceOperand src)
         {
             RequireMovDest(dest);
@@ -318,7 +397,11 @@ namespace nanoFramework.Hardware.Pico.Pio
             return new PioInstructionRef(this, Add(PioEncoder.Mov(dest, op, src)));
         }
 
-        /// <summary>(RP2350/PIO v1) MOV RXFIFO[index], ISR — write ISR to RX FIFO slot 0..3.</summary>
+        /// <summary>
+        /// (RP2350/PIO v1) MOV RXFIFO[index], ISR — write ISR to RX FIFO slot 0..3.
+        /// </summary>
+        /// <param name="index">The RX FIFO index (0..3).</param>
+        /// <returns>The instruction reference.</returns>
         /// <exception cref="ArgumentException">RX FIFO index must be 0..3.</exception>
         public PioInstructionRef MovToRxFifo(int index)
         {
@@ -331,14 +414,20 @@ namespace nanoFramework.Hardware.Pico.Pio
             return new PioInstructionRef(this, Add(PioEncoder.MovToRxFifo(index)));
         }
 
-        /// <summary>(RP2350/PIO v1) MOV RXFIFO[Y], ISR — write ISR to the slot selected by Y.</summary>
+        /// <summary>
+        /// (RP2350/PIO v1) MOV RXFIFO[Y], ISR — write ISR to the slot selected by Y.
+        /// </summary>
+        /// <returns>The instruction reference.</returns>
         public PioInstructionRef MovToRxFifoIndexedY()
         {
             RequireV1("MOV RXFIFO[Y]");
             return new PioInstructionRef(this, Add(PioEncoder.MovToRxFifoIndexedY()));
         }
 
-        /// <summary>(RP2350/PIO v1) MOV OSR, RXFIFO[index] — read RX FIFO slot 0..3 into OSR.</summary>
+        /// <summary>
+        /// (RP2350/PIO v1) MOV OSR, RXFIFO[index] — read RX FIFO slot 0..3 into OSR.
+        /// </summary>
+        /// <param name="index">The RX FIFO index (0..3).</param>
         /// <exception cref="ArgumentException">RX FIFO index must be 0..3.</exception>
         public PioInstructionRef MovFromRxFifo(int index)
         {
@@ -351,7 +440,10 @@ namespace nanoFramework.Hardware.Pico.Pio
             return new PioInstructionRef(this, Add(PioEncoder.MovFromRxFifo(index)));
         }
 
-        /// <summary>(RP2350/PIO v1) MOV OSR, RXFIFO[Y] — read the slot selected by Y into OSR.</summary>
+        /// <summary>
+        /// (RP2350/PIO v1) MOV OSR, RXFIFO[Y] — read the slot selected by Y into OSR.
+        /// </summary>
+        /// <returns>The instruction reference.</returns>
         public PioInstructionRef MovFromRxFifoIndexedY()
         {
             RequireV1("MOV OSR, RXFIFO[Y]");
@@ -366,7 +458,13 @@ namespace nanoFramework.Hardware.Pico.Pio
             }
         }
 
-        /// <summary>IRQ &lt;index&gt; [clear] [wait].</summary>
+        /// <summary>
+        /// IRQ &lt;index&gt; [clear] [wait].
+        /// </summary>
+        /// <param name="index">The IRQ index (0..7).</param>
+        /// <param name="clear">Indicates whether to clear the IRQ.</param>
+        /// <param name="wait">Indicates whether to wait for the IRQ.</param>
+        /// <returns>The instruction reference.</returns>
         /// <exception cref="ArgumentException">IRQ index must be 0..7.</exception>
         public PioInstructionRef Irq(int index, bool clear = false, bool wait = false)
         {
@@ -378,7 +476,12 @@ namespace nanoFramework.Hardware.Pico.Pio
             return new PioInstructionRef(this, Add(PioEncoder.Irq(clear, wait, index)));
         }
 
-        /// <summary>Set &lt;dest&gt;, &lt;value&gt; (0..31).</summary>
+        /// <summary>
+        /// Set &lt;dest&gt;, &lt;value&gt; (0..31).
+        /// </summary>
+        /// <param name="dest">The destination for the Set instruction.</param>
+        /// <param name="value">The value to set (0..31).</param>
+        /// <returns>The instruction reference.</returns>
         /// <exception cref="ArgumentException">Set value must be 0..31.</exception>
         public PioInstructionRef Set(DestinationOperand dest, int value)
         {
@@ -391,7 +494,10 @@ namespace nanoFramework.Hardware.Pico.Pio
             return new PioInstructionRef(this, Add(PioEncoder.Set(dest, value)));
         }
 
-        /// <summary>Nop (alias of MOV Y, Y).</summary>
+        /// <summary>
+        /// Nop (alias of MOV Y, Y).
+        /// </summary>
+        /// <returns>The instruction reference.</returns>
         public PioInstructionRef Nop()
         {
             return new PioInstructionRef(this, Add(PioEncoder.Nop()));
@@ -524,7 +630,9 @@ namespace nanoFramework.Hardware.Pico.Pio
             return index;
         }
 
-        /// <summary>Attaches a post-instruction delay to a slot. Called back from <see cref="PioInstructionRef"/> by index.</summary>
+        /// <summary>
+        /// Attaches a post-instruction delay to a slot. Called back from <see cref="PioInstructionRef"/> by index.
+        /// </summary>
         /// <param name="index">The instruction slot index.</param>
         /// <param name="cycles">The number of delay cycles to attach.</param>
         internal void ApplyDelay(int index, int cycles)
@@ -535,7 +643,9 @@ namespace nanoFramework.Hardware.Pico.Pio
             }
         }
 
-        /// <summary>Attaches a side-set value to a slot. Called back from <see cref="PioInstructionRef"/> by index.</summary>
+        /// <summary>
+        /// Attaches a side-set value to a slot. Called back from <see cref="PioInstructionRef"/> by index.
+        /// </summary>
         /// <param name="index">The instruction slot index.</param>
         /// <param name="value">The side-set value to drive.</param>
         internal void ApplySide(int index, int value)

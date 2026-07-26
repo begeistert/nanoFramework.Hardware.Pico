@@ -14,10 +14,14 @@ namespace nanoFramework.Hardware.Pico.Pio
     /// </summary>
     public sealed class PioProgram
     {
-        /// <summary>Encoded 16-bit instruction words (length &lt;= 32).</summary>
+        /// <summary>
+        /// Encoded 16-bit instruction words (length &lt;= 32).
+        /// </summary>
         public ushort[] Instructions { get; private set; }
 
-        /// <summary>Number of instructions.</summary>
+        /// <summary>
+        /// Number of instructions.
+        /// </summary>
         public int Length
         {
             get
@@ -26,46 +30,88 @@ namespace nanoFramework.Hardware.Pico.Pio
             }
         }
 
-        /// <summary>PC value that wraps back to <see cref="WrapTarget"/> (last instruction by default).</summary>
+        /// <summary>
+        /// PC value that wraps back to <see cref="WrapTarget"/> (last instruction by default).
+        /// </summary>
         public int Wrap { get; private set; }
 
-        /// <summary>PC value wrapped to (0 by default).</summary>
+        /// <summary>
+        /// PC value wrapped to (0 by default).
+        /// </summary>
         public int WrapTarget { get; private set; }
 
-        /// <summary>Fixed load offset 0..31, or -1 when relocatable.</summary>
+        /// <summary>
+        /// Fixed load offset 0..31, or -1 when relocatable.
+        /// </summary>
         public sbyte Origin { get; private set; }
 
-        /// <summary>Side-set value-bit count (excludes the optional enable bit).</summary>
+        /// <summary>
+        /// Side-set value-bit count (excludes the optional enable bit).
+        /// </summary>
         public int SideSetCount { get; private set; }
 
-        /// <summary>Whether side-set is optional (an extra enable bit is reserved).</summary>
+        /// <summary>
+        /// Whether side-set is optional (an extra enable bit is reserved).
+        /// </summary>
         public bool SideSetOptional { get; private set; }
 
-        /// <summary>Whether side-set targets PINDIRS instead of PINS.</summary>
+        /// <summary>
+        /// Whether side-set targets PINDIRS instead of PINS.
+        /// </summary>
         public bool SideSetPinDirs { get; private set; }
 
-        /// <summary>Out/pull shift direction default.</summary>
+        /// <summary>
+        /// Out/pull shift direction default.
+        /// </summary>
         public ShiftDirection OutShiftDir { get; private set; }
 
-        /// <summary>Whether autopull is enabled by default.</summary>
+        /// <summary>
+        /// Whether autopull is enabled by default.
+        /// </summary>
         public bool AutoPull { get; private set; }
 
-        /// <summary>Autopull threshold in bits (1..32).</summary>
+        /// <summary>
+        /// Autopull threshold in bits (1..32).
+        /// </summary>
         public int PullThreshold { get; private set; }
 
-        /// <summary>IN/push shift direction default.</summary>
+        /// <summary>
+        /// IN/push shift direction default.
+        /// </summary>
         public ShiftDirection InShiftDir { get; private set; }
 
-        /// <summary>Whether autopush is enabled by default.</summary>
+        /// <summary>
+        /// Whether autopush is enabled by default.
+        /// </summary>
         public bool AutoPush { get; private set; }
 
-        /// <summary>Autopush threshold in bits (1..32).</summary>
+        /// <summary>
+        /// Autopush threshold in bits (1..32).
+        /// </summary>
         public int PushThreshold { get; private set; }
 
-        /// <summary>Minimum PIO version required to run this program.</summary>
+        /// <summary>
+        /// Minimum PIO version required to run this program.
+        /// </summary>
         public PioVersion Version { get; private set; }
 
-        /// <summary>Initializes a new instance of the <see cref="PioProgram"/> class.</summary>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PioProgram"/> class.
+        /// </summary>
+        /// <param name="instructions">The encoded 16-bit PIO instructions (1..32).</param>
+        /// <param name="wrap">The wrap instruction index.</param>
+        /// <param name="wrapTarget">The wrap-target instruction index.</param>
+        /// <param name="origin">The fixed load offset 0..31, or -1 when relocatable.</param>
+        /// <param name="sideSetCount">The side-set value-bit count (excludes the optional enable bit).</param>
+        /// <param name="sideSetOpt">Whether side-set is optional (an extra enable bit is reserved).</param>
+        /// <param name="sideSetPinDirs">Whether side-set targets PINDIRS instead of PINS.</param>
+        /// <param name="outShiftDir">The out/pull shift direction default.</param>
+        /// <param name="autoPull">Whether autopull is enabled by default.</param>
+        /// <param name="pullThreshold">The autopull threshold in bits (1..32).</param>
+        /// <param name="inShiftDir">The IN/push shift direction default.</param>
+        /// <param name="autoPush">Whether autopush is enabled by default.</param>
+        /// <param name="pushThreshold">The autopush threshold in bits (1..32).</param>
+        /// <param name="version">The minimum PIO version required to run this program.</param>
         internal PioProgram(
             ushort[] instructions,
             int wrap,

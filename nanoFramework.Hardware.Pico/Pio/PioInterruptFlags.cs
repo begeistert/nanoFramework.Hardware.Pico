@@ -13,15 +13,25 @@ namespace nanoFramework.Hardware.Pico.Pio
     [Flags]
     public enum PioInterruptFlags : uint
     {
-        /// <summary>No interrupt flags are set.</summary>
+        /// <summary>
+        /// No interrupt flags are set.
+        /// </summary>
         None = 0,
-        /// <summary>Interrupt flag for State Machine 0.</summary>
+        /// <summary>
+        /// Interrupt flag for State Machine 0.
+        /// </summary>
         Sm0 = 1U << 0,
-        /// <summary>Interrupt flag for State Machine 1.</summary>
+        /// <summary>
+        /// Interrupt flag for State Machine 1.
+        /// </summary>
         Sm1 = 1U << 1,
-        /// <summary>Interrupt flag for State Machine 2.</summary>
+        /// <summary>
+        /// Interrupt flag for State Machine 2.
+        /// </summary>
         Sm2 = 1U << 2,
-        /// <summary>Interrupt flag for State Machine 3.</summary>
+        /// <summary>
+        /// Interrupt flag for State Machine 3.
+        /// </summary>
         Sm3 = 1U << 3
     }
 }

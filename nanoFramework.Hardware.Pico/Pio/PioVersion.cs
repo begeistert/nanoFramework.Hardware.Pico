@@ -5,12 +5,18 @@
 
 namespace nanoFramework.Hardware.Pico.Pio
 {
-    /// <summary>PIO hardware version. Determines which instructions/features are legal.</summary>
+    /// <summary>
+    /// PIO hardware version. Determines which instructions/features are legal.
+    /// </summary>
     public enum PioVersion
     {
-        /// <summary>RP2040 (PIO v0).</summary>
+        /// <summary>
+        /// RP2040 (PIO v0).
+        /// </summary>
         Rp2040 = 0,
-        /// <summary>RP2350 (PIO v1): adds extended MOV, FIFO PUTGET, GPIO base window.</summary>
+        /// <summary>
+        /// RP2350 (PIO v1): adds extended MOV, FIFO PUTGET, GPIO base window.
+        /// </summary>
         Rp2350 = 1,
     }
 }

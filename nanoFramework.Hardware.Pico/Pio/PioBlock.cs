@@ -27,14 +27,19 @@ namespace nanoFramework.Hardware.Pico.Pio
         private readonly object _irqLock = new object();
         private static readonly PioEventListener s_eventListener = new PioEventListener();
 
-        /// <summary>Initializes a new instance of the <see cref="PioBlock"/> class.</summary>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PioBlock"/> class.
+        /// </summary>
+        /// <param name="index">The index of the block.</param>
         internal PioBlock(int index)
         {
             _index = index;
             s_eventListener.AddBlock(this);
         }
 
-        /// <summary>Block index (0..2).</summary>
+        /// <summary>
+        /// Block index (0..2 for Pico 1 and 0..3 for Pico 2).
+        /// </summary>
         public int Index
         {
             get
@@ -67,7 +72,9 @@ namespace nanoFramework.Hardware.Pico.Pio
             return (uint)offset;
         }
 
-        /// <summary>Removes a previously added program (maps to <c>pio_remove_program</c>).</summary>
+        /// <summary>
+        /// Removes a previously added program (maps to <c>pio_remove_program</c>).
+        /// </summary>
         /// <param name="program">The program previously returned by <see cref="AddProgram"/>.</param>
         /// <param name="offset">The load offset the program occupies.</param>
         /// <exception cref="ArgumentNullException"><paramref name="program"/> is <see langword="null"/>.</exception>
@@ -88,18 +95,20 @@ namespace nanoFramework.Hardware.Pico.Pio
             NativeRemoveProgram(_index, program.Length, (int)offset);
         }
 
-        /// <summary>Claims a free state machine on this block (maps to <c>pio_claim_unused_sm</c>).</summary>
+        /// <summary>
+        /// Claims a free state machine on this block (maps to <c>pio_claim_unused_sm</c>).
+        /// </summary>
         /// <returns>The newly claimed state machine.</returns>
         /// <exception cref="InvalidOperationException">All four state machines on the block are already claimed.</exception>
         public PioStateMachine ClaimStateMachine()
         {
-            int sm = NativeClaimUnusedSm(_index, true);
-            if (sm < 0)
+            int stateMachine = NativeClaimUnusedSm(_index, true);
+            if (stateMachine < 0)
             {
                 throw new InvalidOperationException();
             }
 
-            return new PioStateMachine(this, sm, true);
+            return new PioStateMachine(this, stateMachine, true);
         }
 
         /// <summary>
@@ -107,6 +116,9 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// this does <em>not</em> mark the state machine as claimed, so the caller is responsible for avoiding
         /// collisions; prefer <see cref="ClaimStateMachine"/> unless a fixed state machine index is required.
         /// </summary>
+        /// <param name="stateMachine">The state machine index (0..3).</param>
+        /// <returns>The state machine instance.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="stateMachine"/> is less than 0 or greater than 3.</exception>
         public PioStateMachine StateMachine(int stateMachine)
         {
             if (stateMachine < 0 || stateMachine > 3)
@@ -122,6 +134,8 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <c>pio_gpio_init</c>: sets the pad's function select to PIO0/PIO1). Required before a
         /// pin mapped via OUT/SET/side-set/IN actually reaches the physical pad.
         /// </summary>
+        /// <param name="pin">The GPIO to route.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="pin"/> is less than 0 or greater than 47.</exception>
         public void InitGpio(int pin)
         {
             // native side enforces the per-chip GPIO ceiling
@@ -133,7 +147,9 @@ namespace nanoFramework.Hardware.Pico.Pio
             NativeInitGpio(_index, pin);
         }
 
-        /// <summary>Routes <paramref name="count"/> consecutive GPIOs from <paramref name="basePin"/> to this block.</summary>
+        /// <summary>
+        /// Routes <paramref name="count"/> consecutive GPIOs from <paramref name="basePin"/> to this block.
+        /// </summary>
         /// <param name="basePin">The first GPIO to route.</param>
         /// <param name="count">The number of consecutive GPIOs to route.</param>
         /// <exception cref="ArgumentOutOfRangeException">The span falls outside 0..47.</exception>
@@ -151,7 +167,11 @@ namespace nanoFramework.Hardware.Pico.Pio
             }
         }
 
-        /// <summary>Raises PIO IRQ flag <paramref name="irq"/> (0..7) from the CPU side (maps to IRQ_FORCE).</summary>
+        /// <summary>
+        /// Raises PIO IRQ flag <paramref name="irq"/> (0..7) from the CPU side (maps to IRQ_FORCE).
+        /// </summary>
+        /// <param name="irq">The IRQ flag to raise.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="irq"/> is less than 0 or greater than 7.</exception>
         public void ForceIrq(int irq)
         {
             if (irq < 0 || irq > 7)
@@ -162,7 +182,11 @@ namespace nanoFramework.Hardware.Pico.Pio
             NativeForceIrq(_index, irq);
         }
 
-        /// <summary>Clears PIO IRQ flag <paramref name="irq"/> (0..7), e.g. one raised by a state machine's <c>irq</c>.</summary>
+        /// <summary>
+        /// Clears PIO IRQ flag <paramref name="irq"/> (0..7), e.g. one raised by a state machine's <c>irq</c>.
+        /// </summary>
+        /// <param name="irq">The IRQ flag to clear.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="irq"/> is less than 0 or greater than 7.</exception>
         public void ClearIrq(int irq)
         {
             if (irq < 0 || irq > 7)

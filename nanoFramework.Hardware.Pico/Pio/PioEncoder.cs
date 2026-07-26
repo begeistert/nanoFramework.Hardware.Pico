@@ -15,26 +15,49 @@ namespace nanoFramework.Hardware.Pico.Pio
     /// </summary>
     public static class PioEncoder
     {
-        /// <summary>Base opcode for the JMP instruction.</summary>
+        /// <summary>
+        /// Base opcode for the JMP instruction.
+        /// </summary>
         internal const int OpJmp = 0x0000;
-        /// <summary>Base opcode for the WAIT instruction.</summary>
+        /// <summary>
+        /// Base opcode for the WAIT instruction.
+        /// </summary>
         internal const int OpWait = 0x2000;
-        /// <summary>Base opcode for the IN instruction.</summary>
+        /// <summary>
+        /// Base opcode for the IN instruction.
+        /// </summary>
         internal const int OpIn = 0x4000;
-        /// <summary>Base opcode for the OUT instruction.</summary>
+        /// <summary>
+        /// Base opcode for the OUT instruction.
+        /// </summary>
         internal const int OpOut = 0x6000;
-        /// <summary>Base opcode for the PUSH instruction.</summary>
+        /// <summary>
+        /// Base opcode for the PUSH instruction.
+        /// </summary>
         internal const int OpPush = 0x8000;
-        /// <summary>Base opcode for the PULL instruction.</summary>
+        /// <summary>
+        /// Base opcode for the PULL instruction.
+        /// </summary>
         internal const int OpPull = 0x8080;
-        /// <summary>Base opcode for the MOV instruction.</summary>
+        /// <summary>
+        /// Base opcode for the MOV instruction.
+        /// </summary>
         internal const int OpMov = 0xA000;
-        /// <summary>Base opcode for the IRQ instruction.</summary>
+        /// <summary>
+        /// Base opcode for the IRQ instruction.
+        /// </summary>
         internal const int OpIrq = 0xC000;
-        /// <summary>Base opcode for the SET instruction.</summary>
+        /// <summary>
+        /// Base opcode for the SET instruction.
+        /// </summary>
         internal const int OpSet = 0xE000;
 
-        /// <summary>Jmp &lt;cond&gt; &lt;addr&gt;. Address is an absolute program offset 0..31.</summary>
+        /// <summary>
+        /// Jmp &lt;cond&gt; &lt;addr&gt;. Address is an absolute program offset 0..31.
+        /// </summary>
+        /// <param name="condition">The jump condition.</param>
+        /// <param name="address">The absolute program offset to jump to (0..31).</param>
+        /// <returns>The encoded instruction.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="address"/> is outside 0..31.</exception>
         public static ushort Jmp(PioCondition condition, int address)
         {
@@ -46,7 +69,13 @@ namespace nanoFramework.Hardware.Pico.Pio
             return (ushort)(OpJmp | (((int)condition & 0x7) << 5) | address);
         }
 
-        /// <summary>Wait &lt;polarity&gt; &lt;source&gt; &lt;index&gt;.</summary>
+        /// <summary>
+        /// Wait &lt;polarity&gt; &lt;source&gt; &lt;index&gt;.
+        /// </summary>
+        /// <param name="polarity">The polarity of the wait signal.</param>
+        /// <param name="source">The source of the wait signal.</param>
+        /// <param name="index">The index of the wait signal (0..31).</param>
+        /// <returns>The encoded instruction.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is outside 0..31.</exception>
         public static ushort Wait(bool polarity, PioWaitSource source, int index)
         {
@@ -58,7 +87,12 @@ namespace nanoFramework.Hardware.Pico.Pio
             return (ushort)(OpWait | (polarity ? 0x80 : 0) | (((int)source & 0x3) << 5) | index);
         }
 
-        /// <summary>IN &lt;source&gt;, &lt;bitCount&gt; (1..32; 32 encodes as 0).</summary>
+        /// <summary>
+        /// IN &lt;source&gt;, &lt;bitCount&gt; (1..32; 32 encodes as 0).
+        /// </summary>
+        /// <param name="source">The source of the input signal.</param>
+        /// <param name="bitCount">The number of bits to input (1..32).</param>
+        /// <returns>The encoded instruction.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="bitCount"/> is outside 1..32.</exception>
         public static ushort In(SourceOperand source, int bitCount)
         {
@@ -70,7 +104,12 @@ namespace nanoFramework.Hardware.Pico.Pio
             return (ushort)(OpIn | (((int)source & 0x7) << 5) | (bitCount & 0x1F));
         }
 
-        /// <summary>Out &lt;dest&gt;, &lt;bitCount&gt; (1..32; 32 encodes as 0).</summary>
+        /// <summary>
+        /// Out &lt;dest&gt;, &lt;bitCount&gt; (1..32; 32 encodes as 0).
+        /// </summary>
+        /// <param name="dest">The destination of the output signal.</param>
+        /// <param name="bitCount">The number of bits to output (1..32).</param>
+        /// <returns>The encoded instruction.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="bitCount"/> is outside 1..32.</exception>
         public static ushort Out(DestinationOperand dest, int bitCount)
         {
@@ -82,19 +121,35 @@ namespace nanoFramework.Hardware.Pico.Pio
             return (ushort)(OpOut | (((int)dest & 0x7) << 5) | (bitCount & 0x1F));
         }
 
-        /// <summary>Push [iffull] [block].</summary>
+        /// <summary>
+        /// Push [iffull] [block].
+        /// </summary>
+        /// <param name="ifFull">Indicates if the operation should be performed when the FIFO is full.</param>
+        /// <param name="block">Indicates if the operation should block.</param>
+        /// <returns>The encoded instruction.</returns>
         public static ushort Push(bool ifFull, bool block)
         {
             return (ushort)(OpPush | (ifFull ? 0x40 : 0) | (block ? 0x20 : 0));
         }
 
-        /// <summary>Pull [ifempty] [block].</summary>
+        /// <summary>
+        /// Pull [ifempty] [block].
+        /// </summary>
+        /// <param name="ifEmpty">Indicates if the operation should be performed when the FIFO is empty.</param>
+        /// <param name="block">Indicates if the operation should block.</param>
+        /// <returns>The encoded instruction.</returns>
         public static ushort Pull(bool ifEmpty, bool block)
         {
             return (ushort)(OpPull | (ifEmpty ? 0x40 : 0) | (block ? 0x20 : 0));
         }
 
-        /// <summary>Mov &lt;dest&gt;, [op] &lt;src&gt;.</summary>
+        /// <summary>
+        /// Mov &lt;dest&gt;, [op] &lt;src&gt;.
+        /// </summary>
+        /// <param name="dest">The destination of the move operation.</param>
+        /// <param name="op">The operation to perform.</param>
+        /// <param name="src">The source of the move operation.</param>
+        /// <returns>The encoded instruction.</returns>
         public static ushort Mov(DestinationOperand dest, PioMovOp op, SourceOperand src)
         {
             return (ushort)(OpMov | (((int)dest & 0x7) << 5) | (((int)op & 0x3) << 3) | ((int)src & 0x7));
@@ -103,7 +158,11 @@ namespace nanoFramework.Hardware.Pico.Pio
         #region RP2350 (PIO v1) indexed RX-FIFO MOV
         // PUSH/PULL opcode space, arg2 != 0: bit4 v1 form, bit3 fixed index, arg1 bit2 direction
 
-        /// <summary>(v1) MOV RXFIFO[index], ISR — write ISR to RX FIFO slot 0..3.</summary>
+        /// <summary>
+        /// (v1) MOV RXFIFO[index], ISR — write ISR to RX FIFO slot 0..3.
+        /// </summary>
+        /// <param name="index">The RX FIFO slot index (0..3).</param>
+        /// <returns>The encoded instruction.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is outside 0..3.</exception>
         public static ushort MovToRxFifo(int index)
         {
@@ -115,13 +174,20 @@ namespace nanoFramework.Hardware.Pico.Pio
             return (ushort)(OpPush | 0x18 | index);
         }
 
-        /// <summary>(v1) MOV RXFIFO[Y], ISR — write ISR to the RX FIFO slot selected by Y.</summary>
+        /// <summary>
+        /// (v1) MOV RXFIFO[Y], ISR — write ISR to the RX FIFO slot selected by Y.
+        /// </summary>
+        /// <returns>The encoded instruction.</returns>
         public static ushort MovToRxFifoIndexedY()
         {
             return (ushort)(OpPush | 0x10);
         }
 
-        /// <summary>(v1) MOV OSR, RXFIFO[index] — read RX FIFO slot 0..3 into OSR.</summary>
+        /// <summary>
+        /// (v1) MOV OSR, RXFIFO[index] — read RX FIFO slot 0..3 into OSR.
+        /// </summary>
+        /// <param name="index">The RX FIFO slot index (0..3).</param>
+        /// <returns>The encoded instruction.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is outside 0..3.</exception>
         public static ushort MovFromRxFifo(int index)
         {
@@ -133,7 +199,10 @@ namespace nanoFramework.Hardware.Pico.Pio
             return (ushort)(OpPush | 0x80 | 0x18 | index);
         }
 
-        /// <summary>(v1) MOV OSR, RXFIFO[Y] — read the RX FIFO slot selected by Y into OSR.</summary>
+        /// <summary>
+        /// (v1) MOV OSR, RXFIFO[Y] — read the RX FIFO slot selected by Y into OSR.
+        /// </summary>
+        /// <returns>The encoded instruction.</returns>
         public static ushort MovFromRxFifoIndexedY()
         {
             return (ushort)(OpPush | 0x80 | 0x10);
@@ -141,7 +210,13 @@ namespace nanoFramework.Hardware.Pico.Pio
 
         #endregion
 
-        /// <summary>IRQ [clear] [wait] &lt;index&gt; (0..7).</summary>
+        /// <summary>
+        /// IRQ [clear] [wait] &lt;index&gt; (0..7).
+        /// </summary>
+        /// <param name="clear">Indicates if the IRQ should be cleared.</param>
+        /// <param name="wait">Indicates if the operation should wait for the IRQ.</param>
+        /// <param name="index">The IRQ index (0..7).</param>
+        /// <returns>The encoded instruction.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is outside 0..7.</exception>
         public static ushort Irq(bool clear, bool wait, int index)
         {
@@ -153,7 +228,12 @@ namespace nanoFramework.Hardware.Pico.Pio
             return (ushort)(OpIrq | (clear ? 0x40 : 0) | (wait ? 0x20 : 0) | index);
         }
 
-        /// <summary>Set &lt;dest&gt;, &lt;value&gt; (0..31).</summary>
+        /// <summary>
+        /// Set &lt;dest&gt;, &lt;value&gt; (0..31).
+        /// </summary>
+        /// <param name="dest">The destination of the set operation.</param>
+        /// <param name="value">The value to set (0..31).</param>
+        /// <returns>The encoded instruction.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="value"/> is outside 0..31.</exception>
         public static ushort Set(DestinationOperand dest, int value)
         {
@@ -165,7 +245,10 @@ namespace nanoFramework.Hardware.Pico.Pio
             return (ushort)(OpSet | (((int)dest & 0x7) << 5) | value);
         }
 
-        /// <summary>Nop is an alias for MOV Y, Y.</summary>
+        /// <summary>
+        /// Nop is an alias for MOV Y, Y.
+        /// </summary>
+        /// <returns>The encoded instruction.</returns>
         public static ushort Nop()
         {
             return Mov(DestinationOperand.RegisterY, PioMovOp.None, SourceOperand.RegisterY);
@@ -176,6 +259,9 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// The 5-bit [12:8] field is split: side-set value bits (plus one enable bit
         /// when optional) take the top, the remaining low bits are delay.
         /// </summary>
+        /// <param name="sideSetCount">The number of side-set value bits.</param>
+        /// <param name="sideSetOpt">Indicates if side-set is optional.</param>
+        /// <returns>The number of delay bits available.</returns>
         public static int DelayBits(int sideSetCount, bool sideSetOpt)
         {
             return 5 - sideSetCount - (sideSetOpt ? 1 : 0);
@@ -191,6 +277,7 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <param name="sideUsed">Whether this instruction asserts a side-set value.</param>
         /// <param name="sideSetCount">Side-set value-bit count (excludes the opt enable bit).</param>
         /// <param name="sideSetOpt">Whether side-set is optional for this program.</param>
+        /// <returns>The opcode with the delay/side field layered on.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="sideSetCount"/> (plus the optional enable bit) exceeds the 5-bit delay/side field.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="delay"/> or <paramref name="sideValue"/> does not fit its field.</exception>
         public static ushort PackDelaySideSet(

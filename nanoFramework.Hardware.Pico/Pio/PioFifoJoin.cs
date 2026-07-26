@@ -12,17 +12,29 @@ namespace nanoFramework.Hardware.Pico.Pio
     /// </summary>
     public enum PioFifoJoin
     {
-        /// <summary>Separate TX (depth 4) and RX (depth 4) FIFOs.</summary>
+        /// <summary>
+        /// Separate TX (depth 4) and RX (depth 4) FIFOs.
+        /// </summary>
         None = 0,
-        /// <summary>TX FIFO depth 8, RX disabled.</summary>
+        /// <summary>
+        /// TX FIFO depth 8, RX disabled.
+        /// </summary>
         Tx = 1,
-        /// <summary>RX FIFO depth 8, TX disabled.</summary>
+        /// <summary>
+        /// RX FIFO depth 8, TX disabled.
+        /// </summary>
         Rx = 2,
-        /// <summary>(v1) TX depth 4; RX storage is the processor-writable "get" register file.</summary>
+        /// <summary>
+        /// (v1) TX depth 4; RX storage is the processor-writable "get" register file.
+        /// </summary>
         TxGet = 4,
-        /// <summary>(v1) TX depth 4; RX storage is the processor-readable "put" register file.</summary>
+        /// <summary>
+        /// (v1) TX depth 4; RX storage is the processor-readable "put" register file.
+        /// </summary>
         TxPut = 8,
-        /// <summary>(v1) TX depth 4; RX storage is the SM-only "put"/"get" register file.</summary>
+        /// <summary>
+        /// (v1) TX depth 4; RX storage is the SM-only "put"/"get" register file.
+        /// </summary>
         PutGet = 12,
     }
 }

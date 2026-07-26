@@ -21,7 +21,9 @@ namespace nanoFramework.Hardware.Pico.Pio
         private bool _disposed;
         private bool _enabled;
 
-        /// <summary>Initializes a new instance of the <see cref="PioStateMachine"/> class.</summary>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PioStateMachine"/> class.
+        /// </summary>
         /// <param name="block">The owning PIO block.</param>
         /// <param name="sm">The state-machine index (0..3).</param>
         /// <param name="owned"><see langword="true"/> when this wrapper claimed the SM and must release it on dispose.</param>
@@ -32,7 +34,9 @@ namespace nanoFramework.Hardware.Pico.Pio
             _owned = owned;
         }
 
-        /// <summary>State machine index (0..3).</summary>
+        /// <summary>
+        /// State machine index (0..3).
+        /// </summary>
         public int Index
         {
             get
@@ -71,7 +75,10 @@ namespace nanoFramework.Hardware.Pico.Pio
             }
         }
 
-        /// <summary>Pushes a word into the TX FIFO, yielding to other threads until there is room.</summary>
+        /// <summary>
+        /// Pushes a word into the TX FIFO, yielding to other threads until there is room.
+        /// </summary>
+        /// <param name="value">The word to push into the TX FIFO.</param>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public void Put(uint value)
         {
@@ -87,7 +94,10 @@ namespace nanoFramework.Hardware.Pico.Pio
             NativePutBlocking(_block.Index, _sm, value);
         }
 
-        /// <summary>Pops a word from the RX FIFO, yielding to other threads until one is available.</summary>
+        /// <summary>
+        /// Pops a word from the RX FIFO, yielding to other threads until one is available.
+        /// </summary>
+        /// <returns>The word popped from the RX FIFO.</returns>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public uint Get()
         {
@@ -103,35 +113,50 @@ namespace nanoFramework.Hardware.Pico.Pio
             return NativeGetBlocking(_block.Index, _sm);
         }
 
-        /// <summary><see langword="true"/> when the TX FIFO cannot accept another word; otherwise, <see langword="false"/>.</summary>
+        /// <summary>
+        /// Gets a value indicating whether the TX FIFO cannot accept another word.
+        /// </summary>
+        /// <returns><see langword="true"/> if the TX FIFO is full; otherwise, <see langword="false"/>.</returns>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public bool IsTxFull()
         {
             return NativeTxFull(_block.Index, _sm);
         }
 
-        /// <summary><see langword="true"/> when the RX FIFO has no words to read; otherwise, <see langword="false"/>.</summary>
+        /// <summary>
+        /// Gets a value indicating whether the RX FIFO has no words to read.
+        /// </summary>
+        /// <returns><see langword="true"/> if the RX FIFO is empty; otherwise, <see langword="false"/>.</returns>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public bool IsRxEmpty()
         {
             return NativeRxEmpty(_block.Index, _sm);
         }
 
-        /// <summary>Reads the number of words currently queued in the TX FIFO (depth depends on FIFO join).</summary>
+        /// <summary>
+        /// Reads the number of words currently queued in the TX FIFO (depth depends on FIFO join).
+        /// </summary>
+        /// <returns>The number of words in the TX FIFO.</returns>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public uint GetTxLevel()
         {
             return NativeTxLevel(_block.Index, _sm);
         }
 
-        /// <summary>Reads the number of words currently queued in the RX FIFO (depth depends on FIFO join).</summary>
+        /// <summary>
+        /// Reads the number of words currently queued in the RX FIFO (depth depends on FIFO join).
+        /// </summary>
+        /// <returns>The number of words in the RX FIFO.</returns>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public uint GetRxLevel()
         {
             return NativeRxLevel(_block.Index, _sm);
         }
 
-        /// <summary>Reads the state machine's current program counter (instruction-memory offset 0..31).</summary>
+        /// <summary>
+        /// Reads the state machine's current program counter (instruction-memory offset 0..31).
+        /// </summary>
+        /// <returns>The current program counter.</returns>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public uint GetProgramCounter()
         {
@@ -144,6 +169,8 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// CLR thread the way <see cref="Put"/> does. Safe against the FIFO state changing under it: the
         /// check and the write are a single uninterrupted managed step on the cooperative CLR.
         /// </summary>
+        /// <param name="value">The word to push into the TX FIFO.</param>
+        /// <returns><see langword="true"/> if the word was pushed; <see langword="false"/> if the FIFO was full.</returns>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public bool TryPut(uint value)
         {
@@ -160,6 +187,7 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// Attempts to pop a word from the RX FIFO without blocking. Returns <c>false</c> (and sets
         /// <paramref name="value"/> to 0) when the FIFO is empty, instead of blocking like <see cref="Get"/>.
         /// </summary>
+        /// <param name="value">The word popped from the RX FIFO.</param>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public bool TryGet(out uint value)
         {
@@ -173,7 +201,9 @@ namespace nanoFramework.Hardware.Pico.Pio
             return true;
         }
 
-        /// <summary>Clears this state machine's TX and RX FIFOs (maps to <c>pio_sm_clear_fifos</c>).</summary>
+        /// <summary>
+        /// Clears this state machine's TX and RX FIFOs (maps to <c>pio_sm_clear_fifos</c>).
+        /// </summary>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public void ClearFifos()
         {
@@ -210,7 +240,9 @@ namespace nanoFramework.Hardware.Pico.Pio
             NativeClkDivRestart(_block.Index, _sm);
         }
 
-        /// <summary>Changes the clock divider (1.0 .. 65536.0) live and restarts the divider phase.</summary>
+        /// <summary>
+        /// Changes the clock divider (1.0 .. 65536.0) live and restarts the divider phase.
+        /// </summary>
         /// <param name="div">The clock divider, 1.0 to 65536.0.</param>
         /// <exception cref="ArgumentException"><paramref name="div"/> is outside the 1.0 .. 65536.0 range.</exception>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
@@ -253,7 +285,9 @@ namespace nanoFramework.Hardware.Pico.Pio
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>Releases the SM claim if the instance is collected without an explicit Dispose.</summary>
+        /// <summary>
+        /// Releases the SM claim if the instance is collected without an explicit Dispose.
+        /// </summary>
         ~PioStateMachine()
         {
             Dispose(false);

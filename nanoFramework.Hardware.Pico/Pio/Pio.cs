@@ -17,13 +17,16 @@ namespace nanoFramework.Hardware.Pico.Pio
         private static readonly object _lock = new object();
 
         /// <summary>
-        /// Gets the PIO block at <paramref name="index"/> (0 or 1; 2 is RP2350-only).
+        /// Gets the PIO block at the specified index.
         /// </summary>
+        /// <param name="index">The PIO block index (0 or 1; 2 is RP2350-only).</param>
+        /// <returns>The <see cref="PioBlock"/> instance for the specified index.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the <paramref name="index"/> is less than 0 or exceeds the number of available PIO blocks.</exception>
         public static PioBlock Get(int index)
         {
             if (index < 0 || index >= _blocks.Length)
             {
-                throw new System.ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException();
             }
 
             lock (_lock)
