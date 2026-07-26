@@ -19,7 +19,10 @@ namespace nanoFramework.Hardware.Pico.Pio
         private readonly int _sm;
         private readonly bool _owned;
         private bool _disposed;
+#pragma warning disable 0414
+        // this field is used in native so it must be kept here despite "not being used"
         private bool _enabled;
+#pragma warning restore 0414
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PioStateMachine"/> class.
@@ -57,7 +60,7 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public void Init(uint offset, PioStateMachineConfig config)
         {
-            NativeInit(_block.Index, _sm, (int)offset, config.ToBlob());
+            NativeInit((int)offset, config.ToBlob());
         }
 
         /// <summary>
@@ -65,14 +68,78 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// reflects the last value set through this API.
         /// </summary>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
-        public bool Enabled
+        public extern bool Enabled
         {
-            get { return _enabled; }
-            set
-            {
-                _enabled = value;
-                NativeSetEnabled(_block.Index, _sm, value);
-            }
+            [MethodImpl(MethodImplOptions.InternalCall)]
+            get;
+            [MethodImpl(MethodImplOptions.InternalCall)]
+            set;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the TX FIFO cannot accept another word.
+        /// </summary>
+        /// <value><see langword="true"/> if the TX FIFO is full; otherwise, <see langword="false"/>.</value>
+        /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
+        public extern bool IsTxFull
+        {
+            [MethodImpl(MethodImplOptions.InternalCall)]
+            get;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the RX FIFO has no words to read.
+        /// </summary>
+        /// <value><see langword="true"/> if the RX FIFO is empty; otherwise, <see langword="false"/>.</value>
+        /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
+        public extern bool IsRxEmpty
+        {
+            [MethodImpl(MethodImplOptions.InternalCall)]
+            get;
+        }
+
+        /// <summary>
+        /// Reads the number of words currently queued in the TX FIFO (depth depends on FIFO join).
+        /// </summary>
+        /// <value>The number of words in the TX FIFO.</value>
+        /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
+        public extern uint TxLevel
+        {
+            [MethodImpl(MethodImplOptions.InternalCall)]
+            get;
+        }
+
+        /// <summary>
+        /// Reads the number of words currently queued in the RX FIFO (depth depends on FIFO join).
+        /// </summary>
+        /// <value>The number of words in the RX FIFO.</value>
+        /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
+        public extern uint RxLevel
+        {
+            [MethodImpl(MethodImplOptions.InternalCall)]
+            get;
+        }
+
+        /// <summary>
+        /// Reads the state machine's current program counter (instruction-memory offset 0..31).
+        /// </summary>
+        /// <value>The current program counter.</value>
+        /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
+        public extern uint ProgramCounter
+        {
+            [MethodImpl(MethodImplOptions.InternalCall)]
+            get;
+        }
+
+        /// <summary>
+        /// Changes the clock divider (1.0 .. 65536.0) live and restarts the divider phase.
+        /// </summary>
+        /// <exception cref="ArgumentException"><paramref name="value"/> is outside the 1.0 .. 65536.0 range.</exception>
+        /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
+        public extern float ClockDivisor
+        {
+            [MethodImpl(MethodImplOptions.InternalCall)]
+            set;
         }
 
         /// <summary>
@@ -82,7 +149,7 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public void Put(uint value)
         {
-            while (NativeTxFull(_block.Index, _sm))
+            while (IsTxFull)
             {
                 System.Threading.Thread.Sleep(0);
                 if (_disposed)
@@ -91,7 +158,7 @@ namespace nanoFramework.Hardware.Pico.Pio
                 }
             }
 
-            NativePutBlocking(_block.Index, _sm, value);
+            NativePutBlocking(value);
         }
 
         /// <summary>
@@ -101,7 +168,7 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public uint Get()
         {
-            while (NativeRxEmpty(_block.Index, _sm))
+            while (IsRxEmpty)
             {
                 System.Threading.Thread.Sleep(0);
                 if (_disposed)
@@ -110,57 +177,7 @@ namespace nanoFramework.Hardware.Pico.Pio
                 }
             }
 
-            return NativeGetBlocking(_block.Index, _sm);
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the TX FIFO cannot accept another word.
-        /// </summary>
-        /// <returns><see langword="true"/> if the TX FIFO is full; otherwise, <see langword="false"/>.</returns>
-        /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
-        public bool IsTxFull()
-        {
-            return NativeTxFull(_block.Index, _sm);
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the RX FIFO has no words to read.
-        /// </summary>
-        /// <returns><see langword="true"/> if the RX FIFO is empty; otherwise, <see langword="false"/>.</returns>
-        /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
-        public bool IsRxEmpty()
-        {
-            return NativeRxEmpty(_block.Index, _sm);
-        }
-
-        /// <summary>
-        /// Reads the number of words currently queued in the TX FIFO (depth depends on FIFO join).
-        /// </summary>
-        /// <returns>The number of words in the TX FIFO.</returns>
-        /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
-        public uint GetTxLevel()
-        {
-            return NativeTxLevel(_block.Index, _sm);
-        }
-
-        /// <summary>
-        /// Reads the number of words currently queued in the RX FIFO (depth depends on FIFO join).
-        /// </summary>
-        /// <returns>The number of words in the RX FIFO.</returns>
-        /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
-        public uint GetRxLevel()
-        {
-            return NativeRxLevel(_block.Index, _sm);
-        }
-
-        /// <summary>
-        /// Reads the state machine's current program counter (instruction-memory offset 0..31).
-        /// </summary>
-        /// <returns>The current program counter.</returns>
-        /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
-        public uint GetProgramCounter()
-        {
-            return NativeGetPc(_block.Index, _sm);
+            return NativeGetBlocking();
         }
 
         /// <summary>
@@ -174,12 +191,12 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public bool TryPut(uint value)
         {
-            if (NativeTxFull(_block.Index, _sm))
+            if (IsTxFull)
             {
                 return false;
             }
 
-            NativePutBlocking(_block.Index, _sm, value);
+            NativePutBlocking(value);
             return true;
         }
 
@@ -191,13 +208,13 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public bool TryGet(out uint value)
         {
-            if (NativeRxEmpty(_block.Index, _sm))
+            if (IsRxEmpty)
             {
                 value = 0;
                 return false;
             }
 
-            value = NativeGetBlocking(_block.Index, _sm);
+            value = NativeGetBlocking();
             return true;
         }
 
@@ -205,51 +222,33 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// Clears this state machine's TX and RX FIFOs (maps to <c>pio_sm_clear_fifos</c>).
         /// </summary>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
-        public void ClearFifos()
-        {
-            NativeClearFifos(_block.Index, _sm);
-        }
+        [MethodImpl(MethodImplOptions.InternalCall)]
+#pragma warning disable S4200 
+        public extern void ClearFifos();
 
         /// <summary>
         /// Drains any words left in the TX FIFO (maps to <c>pio_sm_drain_tx_fifo</c>): useful before
         /// reconfiguring or restarting so a stale half-streamed frame is not emitted.
         /// </summary>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
-        public void DrainTxFifo()
-        {
-            NativeDrainTxFifo(_block.Index, _sm);
-        }
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern void DrainTxFifo();
 
         /// <summary>
         /// Restarts the state machine's internal state — ISR/OSR, shift counters, delay/clock phase
         /// (maps to <c>pio_sm_restart</c>). Does not touch the FIFOs or the program counter.
         /// </summary>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
-        public void Restart()
-        {
-            NativeRestart(_block.Index, _sm);
-        }
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern void Restart();
 
         /// <summary>
         /// Restarts this state machine's clock divider so its phase realigns with other SMs started at
         /// the same time (maps to <c>pio_sm_clkdiv_restart</c>).
         /// </summary>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
-        public void ClockDivRestart()
-        {
-            NativeClkDivRestart(_block.Index, _sm);
-        }
-
-        /// <summary>
-        /// Changes the clock divider (1.0 .. 65536.0) live and restarts the divider phase.
-        /// </summary>
-        /// <param name="div">The clock divider, 1.0 to 65536.0.</param>
-        /// <exception cref="ArgumentException"><paramref name="div"/> is outside the 1.0 .. 65536.0 range.</exception>
-        /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
-        public void SetClockDivisor(float div)
-        {
-            NativeSetClockDivisor(_block.Index, _sm, div);
-        }
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern void ClockDivRestart();
 
         /// <summary>
         /// Immediately executes a single instruction on the state machine, out of band, without
@@ -257,10 +256,8 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// with <see cref="PioEncoder"/> (or take a word from an assembled <see cref="PioProgram"/>).
         /// </summary>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
-        public void Exec(ushort instruction)
-        {
-            NativeExec(_block.Index, _sm, instruction);
-        }
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern void Exec(ushort instruction);
 
         /// <summary>
         /// Sets the direction (output/input) of <paramref name="count"/> consecutive pins starting at
@@ -273,10 +270,9 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <param name="output"><see langword="true"/> for output, <see langword="false"/> for input.</param>
         /// <exception cref="ArgumentOutOfRangeException">The pin range is outside the chip's GPIOs.</exception>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
-        public void SetConsecutivePinDirs(int basePin, int count, bool output)
-        {
-            NativeSetConsecutivePinDirs(_block.Index, _sm, basePin, count, output);
-        }
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern void SetConsecutivePinDirs(int basePin, int count, bool output);
+#pragma warning restore S4200
 
         /// <inheritdoc/>
         public void Dispose()
@@ -306,8 +302,8 @@ namespace nanoFramework.Hardware.Pico.Pio
             // only a wrapper that claimed the SM may stop or release it; a fixed-index view must not touch someone else's
             if (_owned)
             {
-                NativeSetEnabled(_block.Index, _sm, false);
-                NativeUnclaim(_block.Index, _sm);
+                Enabled = false;
+                NativeUnclaim();
             }
         }
 
@@ -325,13 +321,9 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ArgumentNullException"><paramref name="buffer"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentOutOfRangeException">The range falls outside <paramref name="buffer"/>, or an argument is negative.</exception>
         /// <exception cref="InvalidOperationException">No DMA channel was free, or a transfer is already running on this state machine.</exception>
-        public int Read(uint[] buffer, int offset, int count, int timeoutMs)
-        {
-            // Single native call: sets up the transfer, parks this thread on the PIO event so the CLR yields,
-            // and resumes on the completion IRQ to copy the result -- no busy-wait, no FIFO overflow. The
-            // native handler validates the claim state and throws if the state machine has been disposed.
-            return NativeRead(_block.Index, _sm, buffer, offset, count, timeoutMs);
-        }
+        [MethodImpl(MethodImplOptions.InternalCall)]
+#pragma warning disable S4200 
+        public extern int Read(uint[] buffer, int offset, int count, int timeoutMs);
 
         /// <summary>
         /// Writes <paramref name="count"/> words from <paramref name="buffer"/> into the TX FIFO using a
@@ -347,72 +339,23 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ArgumentNullException"><paramref name="buffer"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentOutOfRangeException">The range falls outside <paramref name="buffer"/>, or an argument is negative.</exception>
         /// <exception cref="InvalidOperationException">No DMA channel was free, or a transfer is already running on this state machine.</exception>
-        public int Write(uint[] buffer, int offset, int count, int timeoutMs)
-        {
-            // Single native call: copies the words into a bounce buffer, parks this thread on the PIO event
-            // so the CLR yields, and resumes on the completion IRQ -- no busy-wait, no FIFO stall. The native
-            // handler validates the claim state and throws if the state machine has been disposed.
-            return NativeWrite(_block.Index, _sm, buffer, offset, count, timeoutMs);
-        }
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern int Write(uint[] buffer, int offset, int count, int timeoutMs);
+#pragma warning restore S4200
 
         #region Native interop (implemented in nf-interpreter)
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern int NativeRead(int block, int sm, uint[] buffer, int offset, int count, int timeoutMs);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern int NativeWrite(int block, int sm, uint[] buffer, int offset, int count, int timeoutMs);
-
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void NativeInit(int block, int sm, int offset, uint[] configBlob);
+        private extern void NativeInit(int offset, uint[] configBlob);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void NativeSetEnabled(int block, int sm, bool enabled);
+        private extern void NativePutBlocking(uint value);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void NativePutBlocking(int block, int sm, uint value);
+        private extern uint NativeGetBlocking();
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern uint NativeGetBlocking(int block, int sm);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern bool NativeTxFull(int block, int sm);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern bool NativeRxEmpty(int block, int sm);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void NativeUnclaim(int block, int sm);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void NativeSetConsecutivePinDirs(int block, int sm, int basePin, int count, bool output);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void NativeClearFifos(int block, int sm);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void NativeDrainTxFifo(int block, int sm);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void NativeRestart(int block, int sm);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void NativeClkDivRestart(int block, int sm);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void NativeExec(int block, int sm, ushort instruction);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern uint NativeTxLevel(int block, int sm);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern uint NativeRxLevel(int block, int sm);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern uint NativeGetPc(int block, int sm);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void NativeSetClockDivisor(int block, int sm, float div);
+        private extern void NativeUnclaim();
 
         #endregion
     }

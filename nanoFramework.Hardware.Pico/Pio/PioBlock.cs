@@ -56,21 +56,9 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <returns>The instruction-memory offset the program was loaded at.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="program"/> is <see langword="null"/>.</exception>
         /// <exception cref="InvalidOperationException">There is no room left in the block to load the program.</exception>
-        public uint AddProgram(PioProgram program)
-        {
-            if (program == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            int offset = NativeAddProgram(_index, program.Instructions, program.Length, program.Origin);
-            if (offset < 0)
-            {
-                throw new InvalidOperationException();
-            }
-
-            return (uint)offset;
-        }
+        [MethodImpl(MethodImplOptions.InternalCall)]
+#pragma warning disable S4200 // OK to call native methods directly in nanoFramework
+        public extern uint AddProgram(PioProgram program);
 
         /// <summary>
         /// Removes a previously added program (maps to <c>pio_remove_program</c>).
@@ -79,21 +67,9 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <param name="offset">The load offset the program occupies.</param>
         /// <exception cref="ArgumentNullException"><paramref name="program"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="offset"/> plus the program length exceeds the 32-word instruction memory.</exception>
-        public void RemoveProgram(PioProgram program, uint offset)
-        {
-            if (program == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            // offset + length must fit the 32-word instruction memory; reject before the uint->int narrowing
-            if (program.Length <= 0 || offset > (uint)(32 - program.Length))
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-
-            NativeRemoveProgram(_index, program.Length, (int)offset);
-        }
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern void RemoveProgram(PioProgram program, uint offset);
+#pragma warning restore S4200
 
         /// <summary>
         /// Claims a free state machine on this block (maps to <c>pio_claim_unused_sm</c>).
@@ -136,16 +112,10 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// </summary>
         /// <param name="pin">The GPIO to route.</param>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="pin"/> is less than 0 or greater than 47.</exception>
-        public void InitGpio(int pin)
-        {
-            // native side enforces the per-chip GPIO ceiling
-            if (pin < 0 || pin > 47)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-
-            NativeInitGpio(_index, pin);
-        }
+        [MethodImpl(MethodImplOptions.InternalCall)]
+#pragma warning disable S4200 
+        public extern void InitGpio(int pin);
+#pragma warning restore S4200
 
         /// <summary>
         /// Routes <paramref name="count"/> consecutive GPIOs from <paramref name="basePin"/> to this block.
@@ -172,30 +142,18 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// </summary>
         /// <param name="irq">The IRQ flag to raise.</param>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="irq"/> is less than 0 or greater than 7.</exception>
-        public void ForceIrq(int irq)
-        {
-            if (irq < 0 || irq > 7)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-
-            NativeForceIrq(_index, irq);
-        }
+        [MethodImpl(MethodImplOptions.InternalCall)]
+#pragma warning disable S4200 
+        public extern void ForceIrq(int irq);
 
         /// <summary>
         /// Clears PIO IRQ flag <paramref name="irq"/> (0..7), e.g. one raised by a state machine's <c>irq</c>.
         /// </summary>
         /// <param name="irq">The IRQ flag to clear.</param>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="irq"/> is less than 0 or greater than 7.</exception>
-        public void ClearIrq(int irq)
-        {
-            if (irq < 0 || irq > 7)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-
-            NativeClearIrq(_index, irq);
-        }
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern void ClearIrq(int irq);
+#pragma warning restore S4200
 
         /// <summary>
         /// Raises the <see cref="Interrupt"/> event on the event thread with the given IRQ flags. Called by the
@@ -225,7 +183,7 @@ namespace nanoFramework.Hardware.Pico.Pio
 
                     if (isFirstSubscriber)
                     {
-                        NativeSetIrqEnabled(_index, true);
+                        NativeSetIrqEnabled(true);
                     }
                 }
             }
@@ -238,34 +196,19 @@ namespace nanoFramework.Hardware.Pico.Pio
 
                     if (_interruptCallbacks == null)
                     {
-                        NativeSetIrqEnabled(_index, false);
+                        NativeSetIrqEnabled(false);
                     }
                 }
             }
         }
 
-        #region Native interop (implemented in nf-interpreter)
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern int NativeAddProgram(int block, ushort[] instructions, int length, int origin);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void NativeRemoveProgram(int block, int length, int offset);
+        #region Private Native interop (implemented in nf-interpreter)
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private static extern int NativeClaimUnusedSm(int block, bool required);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void NativeInitGpio(int block, int pin);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void NativeForceIrq(int block, int irq);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void NativeClearIrq(int block, int irq);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void NativeSetIrqEnabled(int block, bool enabled);
+        private extern void NativeSetIrqEnabled(bool enabled);
 
         #endregion
     }

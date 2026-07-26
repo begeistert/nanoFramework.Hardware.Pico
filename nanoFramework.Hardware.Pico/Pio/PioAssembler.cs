@@ -22,7 +22,8 @@ namespace nanoFramework.Hardware.Pico.Pio
         private readonly int[] _delay;
         private readonly int[] _sideValue;
         private readonly bool[] _sideUsed;
-        private readonly PioLabel[] _jmpLabel; // non-null slot => resolve a JMP target at Build
+        // non-null slot => resolve a JMP target at Build
+        private readonly PioLabel[] _jmpLabel;
 
         // instructions emitted (may exceed 32 so Build can report it)
         private int _count;
