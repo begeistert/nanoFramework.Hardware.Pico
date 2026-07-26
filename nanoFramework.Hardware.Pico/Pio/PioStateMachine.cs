@@ -291,26 +291,7 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public void SetClockDivisor(float div)
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(null);
-            }
-
-            // closed-range test so NaN (which fails every ordered comparison) is rejected too
-            if (!(div >= 1.0f && div <= 65536.0f))
-            {
-                throw new ArgumentException();
-            }
-
-            int intPart = (int)div;
-            int frac = (int)((div - intPart) * 256.0f + 0.5f);
-            if (frac > 255)
-            {
-                frac = 0;
-                intPart += 1;
-            }
-
-            NativeSetClockDivisor(_block.Index, _sm, intPart >= 65536 ? 0 : intPart, frac);
+            NativeSetClockDivisor(_block.Index, _sm, div);
         }
 
         /// <summary>
@@ -517,7 +498,7 @@ namespace nanoFramework.Hardware.Pico.Pio
         private static extern uint NativeGetPc(int block, int sm);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern void NativeSetClockDivisor(int block, int sm, int clkDivInt, int clkDivFrac);
+        private static extern void NativeSetClockDivisor(int block, int sm, float div);
 
         #endregion
     }
