@@ -53,21 +53,6 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public void Init(uint offset, PioStateMachineConfig config)
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(null);
-            }
-
-            if (config == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            if (offset > 31)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-
             NativeInit(_block.Index, _sm, (int)offset, config.ToBlob());
         }
 
@@ -81,10 +66,6 @@ namespace nanoFramework.Hardware.Pico.Pio
             get { return _enabled; }
             set
             {
-                if (_disposed)
-                {
-                    throw new ObjectDisposedException(null);
-                }
                 _enabled = value;
                 NativeSetEnabled(_block.Index, _sm, value);
             }
@@ -94,11 +75,6 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public void Put(uint value)
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(null);
-            }
-
             while (NativeTxFull(_block.Index, _sm))
             {
                 System.Threading.Thread.Sleep(0);
@@ -115,11 +91,6 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public uint Get()
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(null);
-            }
-
             while (NativeRxEmpty(_block.Index, _sm))
             {
                 System.Threading.Thread.Sleep(0);
@@ -136,10 +107,6 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public bool IsTxFull()
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(null);
-            }
             return NativeTxFull(_block.Index, _sm);
         }
 
@@ -147,10 +114,6 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public bool IsRxEmpty()
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(null);
-            }
             return NativeRxEmpty(_block.Index, _sm);
         }
 
@@ -158,10 +121,6 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public uint GetTxLevel()
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(null);
-            }
             return NativeTxLevel(_block.Index, _sm);
         }
 
@@ -169,10 +128,6 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public uint GetRxLevel()
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(null);
-            }
             return NativeRxLevel(_block.Index, _sm);
         }
 
@@ -180,10 +135,6 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public uint GetProgramCounter()
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(null);
-            }
             return NativeGetPc(_block.Index, _sm);
         }
 
@@ -196,11 +147,6 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public bool TryPut(uint value)
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(null);
-            }
-
             if (NativeTxFull(_block.Index, _sm))
             {
                 return false;
@@ -217,11 +163,6 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public bool TryGet(out uint value)
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(null);
-            }
-
             if (NativeRxEmpty(_block.Index, _sm))
             {
                 value = 0;
@@ -236,10 +177,6 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public void ClearFifos()
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(null);
-            }
             NativeClearFifos(_block.Index, _sm);
         }
 
@@ -250,10 +187,6 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public void DrainTxFifo()
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(null);
-            }
             NativeDrainTxFifo(_block.Index, _sm);
         }
 
@@ -264,10 +197,6 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public void Restart()
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(null);
-            }
             NativeRestart(_block.Index, _sm);
         }
 
@@ -278,10 +207,6 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public void ClockDivRestart()
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(null);
-            }
             NativeClkDivRestart(_block.Index, _sm);
         }
 
@@ -302,10 +227,6 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public void Exec(ushort instruction)
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(null);
-            }
             NativeExec(_block.Index, _sm, instruction);
         }
 
@@ -322,17 +243,6 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public void SetConsecutivePinDirs(int basePin, int count, bool output)
         {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(null);
-            }
-
-            // native side enforces the per-chip GPIO ceiling
-            if (basePin < 0 || basePin > 47 || count < 0 || count > 48 - basePin)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-
             NativeSetConsecutivePinDirs(_block.Index, _sm, basePin, count, output);
         }
 
@@ -383,21 +293,6 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="InvalidOperationException">No DMA channel was free, or a transfer is already running on this state machine.</exception>
         public int Read(uint[] buffer, int offset, int count, int timeoutMs)
         {
-            if (buffer == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            if (offset < 0 || count < 0 || timeoutMs < 0 || count > buffer.Length || offset > buffer.Length - count)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-
-            if (count == 0)
-            {
-                return 0;
-            }
-
             // Single native call: sets up the transfer, parks this thread on the PIO event so the CLR yields,
             // and resumes on the completion IRQ to copy the result -- no busy-wait, no FIFO overflow. The
             // native handler validates the claim state and throws if the state machine has been disposed.
@@ -420,21 +315,6 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="InvalidOperationException">No DMA channel was free, or a transfer is already running on this state machine.</exception>
         public int Write(uint[] buffer, int offset, int count, int timeoutMs)
         {
-            if (buffer == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            if (offset < 0 || count < 0 || timeoutMs < 0 || count > buffer.Length || offset > buffer.Length - count)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-
-            if (count == 0)
-            {
-                return 0;
-            }
-
             // Single native call: copies the words into a bounce buffer, parks this thread on the PIO event
             // so the CLR yields, and resumes on the completion IRQ -- no busy-wait, no FIFO stall. The native
             // handler validates the claim state and throws if the state machine has been disposed.
