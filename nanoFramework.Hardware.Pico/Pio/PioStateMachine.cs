@@ -38,13 +38,13 @@ namespace nanoFramework.Hardware.Pico.Pio
         }
 
         /// <summary>
-        /// State machine index (0..3).
+        /// The state machine this instance drives.
         /// </summary>
-        public int Index
+        public PioStateMachineIndex Index
         {
             get
             {
-                return _sm;
+                return (PioStateMachineIndex)_sm;
             }
         }
 
@@ -143,62 +143,40 @@ namespace nanoFramework.Hardware.Pico.Pio
         }
 
         /// <summary>
-        /// Pushes a word into the TX FIFO, yielding to other threads until there is room.
+        /// Pushes a word into the TX FIFO, waiting for room if the FIFO is full.
         /// </summary>
         /// <param name="value">The word to push into the TX FIFO.</param>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
-        public void Put(uint value)
-        {
-            while (IsTxFull)
-            {
-                System.Threading.Thread.Sleep(0);
-                if (_disposed)
-                {
-                    throw new ObjectDisposedException(null);
-                }
-            }
-
-            NativePutBlocking(value);
-        }
+        /// <exception cref="TimeoutException">The TX FIFO stayed full for the whole wait budget, which means the state machine is not consuming words.</exception>
+#pragma warning disable S4200 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern void Put(uint value);
+#pragma warning restore S4200
 
         /// <summary>
-        /// Pops a word from the RX FIFO, yielding to other threads until one is available.
+        /// Pops a word from the RX FIFO, waiting for one if the FIFO is empty.
         /// </summary>
         /// <returns>The word popped from the RX FIFO.</returns>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
-        public uint Get()
-        {
-            while (IsRxEmpty)
-            {
-                System.Threading.Thread.Sleep(0);
-                if (_disposed)
-                {
-                    throw new ObjectDisposedException(null);
-                }
-            }
-
-            return NativeGetBlocking();
-        }
+        /// <exception cref="TimeoutException">The RX FIFO stayed empty for the whole wait budget, which means the state machine is not producing words.</exception>
+#pragma warning disable S4200 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern uint Get();
+#pragma warning restore S4200
 
         /// <summary>
         /// Attempts to push a word into the TX FIFO without blocking. Returns <c>false</c> (and writes
         /// nothing) when the FIFO is full, so callers can poll or do other work instead of stalling the
-        /// CLR thread the way <see cref="Put"/> does. Safe against the FIFO state changing under it: the
-        /// check and the write are a single uninterrupted managed step on the cooperative CLR.
+        /// CLR thread the way <see cref="Put"/> does. The check and the write happen as one native step, so
+        /// the FIFO state cannot change in between.
         /// </summary>
         /// <param name="value">The word to push into the TX FIFO.</param>
         /// <returns><see langword="true"/> if the word was pushed; <see langword="false"/> if the FIFO was full.</returns>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
-        public bool TryPut(uint value)
-        {
-            if (IsTxFull)
-            {
-                return false;
-            }
-
-            NativePutBlocking(value);
-            return true;
-        }
+#pragma warning disable S4200 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern bool TryPut(uint value);
+#pragma warning restore S4200
 
         /// <summary>
         /// Attempts to pop a word from the RX FIFO without blocking. Returns <c>false</c> (and sets
@@ -206,17 +184,10 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// </summary>
         /// <param name="value">The word popped from the RX FIFO.</param>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
-        public bool TryGet(out uint value)
-        {
-            if (IsRxEmpty)
-            {
-                value = 0;
-                return false;
-            }
-
-            value = NativeGetBlocking();
-            return true;
-        }
+#pragma warning disable S4200 
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        public extern bool TryGet(out uint value);
+#pragma warning restore S4200
 
         /// <summary>
         /// Clears this state machine's TX and RX FIFOs (maps to <c>pio_sm_clear_fifos</c>).
@@ -347,12 +318,6 @@ namespace nanoFramework.Hardware.Pico.Pio
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern void NativeInit(int offset, uint[] configBlob);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern void NativePutBlocking(uint value);
-
-        [MethodImpl(MethodImplOptions.InternalCall)]
-        private extern uint NativeGetBlocking();
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern void NativeUnclaim();

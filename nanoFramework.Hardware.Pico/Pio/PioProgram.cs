@@ -189,7 +189,7 @@ namespace nanoFramework.Hardware.Pico.Pio
             int length = instructions.Length;
             if (length == 0 || length > 32)
             {
-                throw new ArgumentException();
+                throw new ArgumentOutOfRangeException();
             }
 
             // wrap/wrap-target must be PCs inside the program, wrapping back not forward (matches Build)

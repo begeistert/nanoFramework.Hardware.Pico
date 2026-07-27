@@ -70,7 +70,7 @@ namespace nanoFramework.Hardware.Pico.Pio
 
             if (options.SideSetCount < 0 || options.SideSetCount > 5)
             {
-                throw new ArgumentException();
+                throw new ArgumentOutOfRangeException();
             }
 
             int total = options.SideSetCount + (options.SideSetOption ? 1 : 0);
@@ -198,7 +198,7 @@ namespace nanoFramework.Hardware.Pico.Pio
         {
             if (origin < 0 || origin > 31)
             {
-                throw new ArgumentException();
+                throw new ArgumentOutOfRangeException();
             }
 
             _origin = (sbyte)origin;
@@ -286,7 +286,7 @@ namespace nanoFramework.Hardware.Pico.Pio
         {
             if (address < 0 || address > 31)
             {
-                throw new ArgumentException();
+                throw new ArgumentOutOfRangeException();
             }
 
             return new PioInstructionRef(this, Add(PioEncoder.Jmp(condition, address)));
@@ -304,7 +304,7 @@ namespace nanoFramework.Hardware.Pico.Pio
         {
             if (index < 0 || index > 31)
             {
-                throw new ArgumentException();
+                throw new ArgumentOutOfRangeException();
             }
 
             return new PioInstructionRef(this, Add(PioEncoder.Wait(polarity, source, index)));
@@ -409,7 +409,7 @@ namespace nanoFramework.Hardware.Pico.Pio
             RequireV1("MOV RXFIFO[]");
             if (index < 0 || index > 3)
             {
-                throw new ArgumentException();
+                throw new ArgumentOutOfRangeException();
             }
 
             return new PioInstructionRef(this, Add(PioEncoder.MovToRxFifo(index)));
@@ -435,7 +435,7 @@ namespace nanoFramework.Hardware.Pico.Pio
             RequireV1("MOV OSR, RXFIFO[]");
             if (index < 0 || index > 3)
             {
-                throw new ArgumentException();
+                throw new ArgumentOutOfRangeException();
             }
 
             return new PioInstructionRef(this, Add(PioEncoder.MovFromRxFifo(index)));
@@ -471,7 +471,7 @@ namespace nanoFramework.Hardware.Pico.Pio
         {
             if (index < 0 || index > 7)
             {
-                throw new ArgumentException();
+                throw new ArgumentOutOfRangeException();
             }
 
             return new PioInstructionRef(this, Add(PioEncoder.Irq(clear, wait, index)));
@@ -488,7 +488,7 @@ namespace nanoFramework.Hardware.Pico.Pio
         {
             if (value < 0 || value > 31)
             {
-                throw new ArgumentException();
+                throw new ArgumentOutOfRangeException();
             }
 
             RequireSetDest(dest);
@@ -558,7 +558,7 @@ namespace nanoFramework.Hardware.Pico.Pio
                 int delay = _delay[i];
                 if (delay < 0 || delay > maxDelay)
                 {
-                    throw new ArgumentException(
+                    throw new ArgumentOutOfRangeException(
                         "Delay " + delay + " at offset " + i + " out of range 0.." + maxDelay +
                         " (side-set of " + _sideSetCount + " bit(s) leaves " +
                         PioEncoder.DelayBits(_sideSetCount, _sideSetOpt) + " delay bits).");
@@ -577,7 +577,7 @@ namespace nanoFramework.Hardware.Pico.Pio
 
                     if (sideValue < 0 || sideValue > maxSide)
                     {
-                        throw new ArgumentException(
+                        throw new ArgumentOutOfRangeException(
                             "Side-set value " + sideValue + " at offset " + i + " out of range 0.." + maxSide + ".");
                     }
                 }
@@ -666,7 +666,7 @@ namespace nanoFramework.Hardware.Pico.Pio
         {
             if (bitCount < 1 || bitCount > 32)
             {
-                throw new ArgumentException();
+                throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -674,7 +674,7 @@ namespace nanoFramework.Hardware.Pico.Pio
         {
             if (threshold < 1 || threshold > 32)
             {
-                throw new ArgumentException();
+                throw new ArgumentOutOfRangeException();
             }
         }
 

@@ -131,8 +131,10 @@ namespace nanoFramework.Hardware.Pico.Pio
         private const int MaxShiftThreshold = 32;
         private const int DefaultClockDivInt = 1;
 
-        private int _outBase, _outCount;
-        private int _setBase, _setCount;
+        private int _outBase;
+        private int _outCount;
+        private int _setBase;
+        private int _setCount;
         private int _sideSetBase;
         private int _inBase;
         private bool _inBaseSet;
@@ -182,7 +184,7 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <param name="program">The assembled program.</param>
         /// <param name="offset">The absolute instruction-memory offset where the program will be loaded (0..31).</param>
         /// <exception cref="ArgumentNullException"><paramref name="program"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ArgumentException">Offset must be 0..31.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Offset must be 0..31.</exception>
         public static PioStateMachineConfig FromProgram(PioProgram program, int offset)
         {
             if (program == null)
@@ -192,7 +194,7 @@ namespace nanoFramework.Hardware.Pico.Pio
 
             if (offset < 0 || offset > 31)
             {
-                throw new ArgumentException();
+                throw new ArgumentOutOfRangeException();
             }
 
             PioStateMachineConfig cfg = new PioStateMachineConfig();
@@ -228,12 +230,12 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// </summary>
         /// <param name="basePin">The base GPIO pin.</param>
         /// <param name="count">The number of consecutive pins.</param>
-        /// <exception cref="ArgumentException">SET pin count must be 0..5.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">SET pin count must be 0..5.</exception>
         public PioStateMachineConfig SetPins(int basePin, int count)
         {
             if (count < 0 || count > 5)
             {
-                throw new ArgumentException();
+                throw new ArgumentOutOfRangeException();
             }
 
             ValidatePinBase(basePin);
@@ -282,13 +284,13 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// Stored as the integer and 1/256 fractional parts of the CLKDIV register.
         /// </summary>
         /// <param name="div">The clock divider, 1.0 to 65536.0.</param>
-        /// <exception cref="ArgumentException">Clock divisor must be 1.0..65536.0.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Clock divisor must be 1.0..65536.0.</exception>
         public PioStateMachineConfig ClockDivisor(float div)
         {
             // closed-range test so NaN (which fails every ordered comparison) is rejected too
             if (!(div >= 1.0f && div <= 65536.0f))
             {
-                throw new ArgumentException();
+                throw new ArgumentOutOfRangeException();
             }
 
             int intPart = (int)div;
@@ -319,19 +321,19 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// </summary>
         /// <param name="frequencyHz">Desired SM tick frequency in Hz (must be positive).</param>
         /// <param name="sysClockHz">System clock in Hz (defaults to <see cref="DefaultSystemClockHz"/>).</param>
-        /// <exception cref="ArgumentException">Frequency must be positive.</exception>
-        /// <exception cref="ArgumentException">System clock must be positive.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Frequency must be positive.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">System clock must be positive.</exception>
         public PioStateMachineConfig ClockFromFrequency(float frequencyHz, float sysClockHz = DefaultSystemClockHz)
         {
             // ordered test so NaN (which fails every ordered comparison) is rejected too
             if (!(frequencyHz > 0f))
             {
-                throw new ArgumentException();
+                throw new ArgumentOutOfRangeException();
             }
 
             if (!(sysClockHz > 0f))
             {
-                throw new ArgumentException();
+                throw new ArgumentOutOfRangeException();
             }
 
             float div = sysClockHz / frequencyHz;
@@ -402,12 +404,12 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <param name="sel">The FIFO to monitor.</param>
         /// <param name="n">The threshold (0..15).</param>
         /// <returns>This configuration, for chaining.</returns>
-        /// <exception cref="ArgumentException">Status N must be 0..15.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Status N must be 0..15.</exception>
         public PioStateMachineConfig MovStatus(PioMovStatusSel sel, int n)
         {
             if (n < 0 || n > 15)
             {
-                throw new ArgumentException();
+                throw new ArgumentOutOfRangeException();
             }
 
             _movStatusSel = sel;
@@ -424,12 +426,12 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <param name="enableInlineOut">Indicates whether to use the inline output enable.</param>
         /// <param name="enableBitIndex">The index of the bit used for output enable (0..31).</param>
         /// <returns>This configuration, for chaining.</returns>
-        /// <exception cref="ArgumentException">Enable bit index must be 0..31.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Enable bit index must be 0..31.</exception>
         public PioStateMachineConfig OutSpecial(bool sticky, bool enableInlineOut, int enableBitIndex)
         {
             if (enableBitIndex < 0 || enableBitIndex > 31)
             {
-                throw new ArgumentException();
+                throw new ArgumentOutOfRangeException();
             }
 
             _outSticky = sticky;
@@ -511,9 +513,9 @@ namespace nanoFramework.Hardware.Pico.Pio
 
         private static void ValidatePinBase(int basePin)
         {
-            if (basePin < 0 || basePin > 47)
+            if (basePin < 0 || basePin > Pio.MaxPin)
             {
-                throw new ArgumentException();
+                throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -522,7 +524,7 @@ namespace nanoFramework.Hardware.Pico.Pio
             ValidatePinBase(basePin);
             if (count < 0 || count > 32)
             {
-                throw new ArgumentException();
+                throw new ArgumentOutOfRangeException();
             }
         }
     }

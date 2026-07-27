@@ -72,37 +72,18 @@ namespace nanoFramework.Hardware.Pico.Pio
 #pragma warning restore S4200
 
         /// <summary>
-        /// Claims a free state machine on this block (maps to <c>pio_claim_unused_sm</c>).
+        /// Claims a state machine on this block and returns it. With no argument it takes whichever one
+        /// is free (<c>pio_claim_unused_sm</c>); with an explicit index it takes exactly that one
+        /// (<c>pio_sm_claim</c>) and fails if somebody else already holds it. Disposing the returned
+        /// instance releases the claim.
         /// </summary>
+        /// <param name="stateMachine">The state machine to claim, or <see cref="PioStateMachineIndex.Any"/> for the first free one.</param>
         /// <returns>The newly claimed state machine.</returns>
-        /// <exception cref="InvalidOperationException">All four state machines on the block are already claimed.</exception>
-        public PioStateMachine ClaimStateMachine()
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="stateMachine"/> is not one of the defined values.</exception>
+        /// <exception cref="InvalidOperationException">The requested state machine is already claimed, or none is free.</exception>
+        public PioStateMachine ClaimStateMachine(PioStateMachineIndex stateMachine = PioStateMachineIndex.Any)
         {
-            int stateMachine = NativeClaimUnusedSm(_index, true);
-            if (stateMachine < 0)
-            {
-                throw new InvalidOperationException();
-            }
-
-            return new PioStateMachine(this, stateMachine, true);
-        }
-
-        /// <summary>
-        /// Gets a specific state machine (0..3) on this block. Unlike <see cref="ClaimStateMachine"/>
-        /// this does <em>not</em> mark the state machine as claimed, so the caller is responsible for avoiding
-        /// collisions; prefer <see cref="ClaimStateMachine"/> unless a fixed state machine index is required.
-        /// </summary>
-        /// <param name="stateMachine">The state machine index (0..3).</param>
-        /// <returns>The state machine instance.</returns>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="stateMachine"/> is less than 0 or greater than 3.</exception>
-        public PioStateMachine StateMachine(int stateMachine)
-        {
-            if (stateMachine < 0 || stateMachine > 3)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-
-            return new PioStateMachine(this, stateMachine, false);
+            return new PioStateMachine(this, NativeClaimSm((int)stateMachine), true);
         }
 
         /// <summary>
@@ -111,7 +92,7 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// pin mapped via OUT/SET/side-set/IN actually reaches the physical pad.
         /// </summary>
         /// <param name="pin">The GPIO to route.</param>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="pin"/> is less than 0 or greater than 47.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="pin"/> is less than 0 or greater than <see cref="Pio.MaxPin"/>.</exception>
         [MethodImpl(MethodImplOptions.InternalCall)]
 #pragma warning disable S4200 
         public extern void InitGpio(int pin);
@@ -125,8 +106,13 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// <exception cref="ArgumentOutOfRangeException">The span falls outside 0..47.</exception>
         public void InitGpioRange(int basePin, int count)
         {
-            // validate the whole span first, so a bad range can't leave the block partly routed
-            if (basePin < 0 || count < 0 || count > 48 || basePin > 48 - count)
+            // Validate the whole span first, so a bad range can't leave the block partly routed.
+            // The bound comes from the firmware: a literal would be wrong on one device or the
+            // other, and a span that passes here only to be rejected halfway through the loop is
+            // exactly the partial routing this guard exists to prevent.
+            int lastPin = Pio.MaxPin;
+
+            if (basePin < 0 || count < 0 || count > lastPin + 1 || basePin > lastPin + 1 - count)
             {
                 throw new ArgumentOutOfRangeException();
             }
@@ -205,7 +191,7 @@ namespace nanoFramework.Hardware.Pico.Pio
         #region Private Native interop (implemented in nf-interpreter)
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        private static extern int NativeClaimUnusedSm(int block, bool required);
+        private extern int NativeClaimSm(int stateMachine);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
         private extern void NativeSetIrqEnabled(bool enabled);

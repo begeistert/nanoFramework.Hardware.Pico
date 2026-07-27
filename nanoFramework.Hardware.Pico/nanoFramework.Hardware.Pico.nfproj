@@ -59,6 +59,7 @@
     <Compile Include="Pio\SourceOperand.cs" />
     <Compile Include="Pio\PioStateMachine.cs" />
     <Compile Include="Pio\PioStateMachineConfig.cs" />
+    <Compile Include="Pio\PioStateMachineIndex.cs" />
     <Compile Include="Pio\PioVersion.cs" />
     <Compile Include="Pio\PioWaitSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
