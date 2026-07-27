@@ -296,15 +296,15 @@ namespace nanoFramework.Hardware.Pico.Pio
                 return;
             }
 
-            _disposed = true;
             _enabled = false;
 
             // only a wrapper that claimed the SM may stop or release it; a fixed-index view must not touch someone else's
             if (_owned)
             {
-                Enabled = false;
                 NativeUnclaim();
             }
+
+            _disposed = true;
         }
 
         /// <summary>
