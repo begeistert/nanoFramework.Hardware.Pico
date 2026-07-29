@@ -54,6 +54,23 @@ namespace nanoFramework.Hardware.Pico.Pio
         }
 
         /// <summary>
+        /// Gets the system clock, in Hz, that the state machine dividers count down from.
+        /// </summary>
+        /// <remarks>
+        /// A state machine's clock is this value divided by <see cref="PioStateMachine.ClockDivisor"/>,
+        /// so anything with a real timing requirement -- a baud rate, a pulse width, a protocol period --
+        /// has to be computed against it. It is not the same on every part, nor fixed for a given part,
+        /// which is why it is read from the firmware instead of assumed:
+        /// <see cref="PioStateMachineConfig.ClockFromFrequency(float, float)"/> defaults to the RP2040
+        /// figure and will be 20 % out on an RP2350 unless this value is passed in.
+        /// </remarks>
+        public static extern int SystemClock
+        {
+            [MethodImpl(MethodImplOptions.InternalCall)]
+            get;
+        }
+
+        /// <summary>
         /// Gets the PIO block at the specified index.
         /// </summary>
         /// <param name="index">The PIO block index, from <see cref="MinIndex"/> up to but not including <see cref="BlockCount"/>.</param>

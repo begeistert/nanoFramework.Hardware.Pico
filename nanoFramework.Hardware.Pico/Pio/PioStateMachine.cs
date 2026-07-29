@@ -132,12 +132,15 @@ namespace nanoFramework.Hardware.Pico.Pio
         }
 
         /// <summary>
-        /// Changes the clock divider (1.0 .. 65536.0) live and restarts the divider phase.
+        /// Gets or sets the clock divider (1.0 .. 65536.0). Setting it changes the divider live and
+        /// restarts the divider phase; getting it reads the value back from the hardware register.
         /// </summary>
         /// <exception cref="ArgumentException"><paramref name="value"/> is outside the 1.0 .. 65536.0 range.</exception>
         /// <exception cref="ObjectDisposedException">The state machine has been disposed.</exception>
         public extern float ClockDivisor
         {
+            [MethodImpl(MethodImplOptions.InternalCall)]
+            get;
             [MethodImpl(MethodImplOptions.InternalCall)]
             set;
         }

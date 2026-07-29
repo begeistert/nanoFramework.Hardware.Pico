@@ -53,6 +53,7 @@
     <Compile Include="Pio\PioInterruptFlags.cs" />
     <Compile Include="Pio\PioMovOp.cs" />
     <Compile Include="Pio\PioMovStatusSel.cs" />
+    <Compile Include="Pio\PioPinPull.cs" />
     <Compile Include="Pio\PioProgram.cs" />
     <Compile Include="Pio\PioProgramOptions.cs" />
     <Compile Include="Pio\ShiftDirection.cs" />

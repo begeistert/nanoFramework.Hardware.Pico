@@ -92,10 +92,11 @@ namespace nanoFramework.Hardware.Pico.Pio
         /// pin mapped via OUT/SET/side-set/IN actually reaches the physical pad.
         /// </summary>
         /// <param name="pin">The GPIO to route.</param>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="pin"/> is less than 0 or greater than <see cref="Pio.MaxPin"/>.</exception>
+        /// <param name="pull">The pad pull to leave on the pin; an open-drain bus needs <see cref="PioPinPull.Up"/>.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="pin"/> is less than 0 or greater than <see cref="Pio.MaxPin"/>, or <paramref name="pull"/> is not a defined value.</exception>
         [MethodImpl(MethodImplOptions.InternalCall)]
 #pragma warning disable S4200 
-        public extern void InitGpio(int pin);
+        public extern void InitGpio(int pin, PioPinPull pull = PioPinPull.None);
 #pragma warning restore S4200
 
         /// <summary>
