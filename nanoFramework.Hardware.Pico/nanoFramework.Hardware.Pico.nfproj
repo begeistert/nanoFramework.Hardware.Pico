@@ -33,7 +33,7 @@
   <PropertyGroup>
     <!-- override default options for MetaDataProcessor -->
     <NF_GenerateStubsDirectory>bin\$(Configuration)\Stubs</NF_GenerateStubsDirectory>
-    <NF_GenerateSkeletonProjectName>nanoFramework_hardware_pico_native</NF_GenerateSkeletonProjectName>
+    <NF_GenerateSkeletonProjectName>nanoFramework_hardware_pico</NF_GenerateSkeletonProjectName>
     <Name>nanoFramework.Hardware.Pico</Name>
   </PropertyGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
