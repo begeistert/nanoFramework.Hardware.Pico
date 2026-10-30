@@ -205,12 +205,12 @@ namespace nanoFramework.Hardware.Pico.Pio
         }
 
         /// <summary>
-        /// Default OUT/pull shift behavior (equivalent to pioasm <c>.out</c>).
+        /// Sets the program's default OUT/pull shift behavior (equivalent to pioasm <c>.out</c>). Emits no instruction.
         /// </summary>
         /// <param name="direction">The shift direction.</param>
         /// <param name="autoPull">Indicates whether to automatically pull data.</param>
         /// <param name="threshold">The threshold for automatic pulling.</param>
-        public void OutShift(ShiftDirection direction, bool autoPull, int threshold)
+        public void SetOutShift(ShiftDirection direction, bool autoPull, int threshold)
         {
             ValidateThreshold(threshold);
             _outShiftDir = direction;
@@ -219,12 +219,12 @@ namespace nanoFramework.Hardware.Pico.Pio
         }
 
         /// <summary>
-        /// Default IN/push shift behavior (equivalent to pioasm <c>.in</c>).
+        /// Sets the program's default IN/push shift behavior (equivalent to pioasm <c>.in</c>). Emits no instruction.
         /// </summary>
         /// <param name="direction">The shift direction.</param>
         /// <param name="autoPush">Indicates whether to automatically push data.</param>
         /// <param name="threshold">The threshold for automatic pushing.</param>
-        public void InShift(ShiftDirection direction, bool autoPush, int threshold)
+        public void SetInShift(ShiftDirection direction, bool autoPush, int threshold)
         {
             ValidateThreshold(threshold);
             _inShiftDir = direction;
